@@ -32,7 +32,7 @@ if __name__=="__main__":
 
     number_of_problem=5  # 한번에 몇개의 문제를
     number_of_batch=10  # 문제당 몇 episode씩 한번에 학습할껀지
-    number_of_trial=3000  # #이를 몇번 반복할껀지
+    number_of_trial=5000  # #이를 몇번 반복할껀지
     number_of_iteration=1  # 전체 iteration #iteration 단위로 문제 변화
     problem = []
     Control_result=np.zeros((number_of_iteration*number_of_problem,7,6))
