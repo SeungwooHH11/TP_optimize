@@ -2,7 +2,7 @@ from Simulation_V4 import *
 from Network_V2 import *
 import vessl
 
-pip install openpyxl
+
 
 
 if __name__=="__main__":
