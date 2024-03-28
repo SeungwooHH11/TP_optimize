@@ -327,7 +327,7 @@ def do_action(transporter, block_done_matrix, edge_fea_idx, node_fea, edge_fea, 
               tardy_high):
     past_location = int(transporter[agent][1])
     transporter[agent][3] = dis[int(transporter[agent][1]), i] /120 / tardy_high
-    ett=transporter[agent][3]
+    ett=-transporter[agent][3]
     transporter[agent][2] = (max(dis[int(transporter[agent][1]), i] /120 / tardy_high, edge_fea[i][j][1].item()) + edge_fea[i][j][0].item())
     transporter[agent][1] = edge_fea_idx[i][j].item()
     transporter[agent][4] = i
