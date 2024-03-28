@@ -67,14 +67,13 @@ if __name__=="__main__":
                     Control_result[temp_step, nu, 4] = ts.mean()
                     Control_result[temp_step, nu, 5] = ts.var()
             temp_step+=1
-        with pd.ExcelWriter(problem_dir+'problem_set'+str(i)+'.xlsx') as writer:
-            dis = pd.DataFrame(problem[j][7])
-            dis.to_excel(writer, sheet_name='Sheet_Dis', index=False)
-            for j in range(number_of_problem):
-                block_s=pd.DataFrame(problem[j][3])
-                tp_s=pd.DataFrame(problem[j][2])
-                block_s.to_excel(writer, sheet_name='Sheet_block'+str(j), index=False)
-                tp_s.to_excel(writer, sheet_name='Sheet_transporter'+str(j), index=False)
+        dis = pd.DataFrame(problem[j][7])
+        dis.to_excel(problem_dir+'problem_dis'+str(i)+'.xlsx', sheet_name='Sheet_Dis', index=False)
+        for j in range(number_of_problem):
+            block_s=pd.DataFrame(problem[j][3])
+            tp_s=pd.DataFrame(problem[j][2])
+            block_s.to_excel(writer, sheet_name='Sheet_block'+str(i)+str(j), index=False)
+            tp_s.to_excel(writer, sheet_name='Sheet_transporter'+str(i)+str(j), index=False)
 
         for nu,mod in enumerate(mode_list):
             print(mod,Control_result[:,nu,0].mean(),Control_result[:,nu,2].mean(),Control_result[:,nu,4].mean())
@@ -117,6 +116,6 @@ if __name__=="__main__":
             vessl.log(step=step, payload={'average_tardy': ave_tardy})
 
             step += 1
-    with pd.ExcelWriter(history_dir + 'history.xlsx') as writer:
-        history=pd.DataFrame(history)
-        history.to_excel(writer, sheet_name='Sheet', index=False)
+
+    history=pd.DataFrame(history)
+    history.to_excel( history_dir+'history.xlsx', sheet_name='Sheet', index=False)
