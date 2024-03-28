@@ -50,10 +50,10 @@ if __name__=="__main__":
 
 
             for nu,mod in enumerate(mode_list):
-                rs=np.zeros(1000)
-                es=np.zeros(1000)
-                ts=np.zeros(1000)
-                for k in range(1000):
+                rs=np.zeros(200)
+                es=np.zeros(200)
+                ts=np.zeros(200)
+                for k in range(200):
                     reward_sum, tardy_sum, ett_sum, event, episode, actions, probs, rewards, dones = simulation(
                         problem[j][0], problem[j][1], problem[j][2], problem[j][3], problem[j][4], problem[j][5],
                         problem[j][6], problem[j][7], problem[j][8], problem[j][9], mod, ppo)
