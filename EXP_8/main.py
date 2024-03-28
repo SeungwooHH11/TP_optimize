@@ -117,6 +117,6 @@ if __name__=="__main__":
             vessl.log(step=step, payload={'average_tardy': ave_tardy})
 
             step += 1
-    with pd.ExcelWriter(history_dir + 'history.xlsx') as writer:
-        history=pd.DataFrame(history)
-        history.to_excel(writer, sheet_name='Sheet', index=False)
+
+    history=pd.DataFrame(history)
+    history.to_excel((history_dir+'history.xlsx', sheet_name='Sheet', index=False)
