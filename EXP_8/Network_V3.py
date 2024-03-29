@@ -25,7 +25,7 @@ class ConvLayer(nn.Module):
         self.bn1 = nn.BatchNorm1d(2 * self.out_fea_len).to(device)
         self.bn2 = nn.BatchNorm1d(self.out_fea_len).to(device)
         self.softplus2 = nn.Softplus()
-        self._initialize_weights()
+        self.initialize_weights()
 
     
     def initialize_weights(self):
@@ -82,7 +82,7 @@ class CrystalGraphConvNet(nn.Module):
         self.act_fun = nn.ELU()
 
         self.fc_out = nn.Linear(h_fea_len, 1).to(device)
-        self._initialize_weights()
+        self.initialize_weights()
                      
     def initialize_weights(self):
         for m in self.modules():
@@ -125,7 +125,7 @@ class MLP(nn.Module):
         self.fc2 = nn.Linear(128, 256)
         self.fc3 = nn.Linear(256, 128)
         self.fc4 = nn.Linear(128, output_size)
-        self._initialize_weights()
+        self.initialize_weights()
 
     def initialize_weights(self):
         for m in self.modules():
