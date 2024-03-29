@@ -16,8 +16,8 @@ if __name__=="__main__":
         os.makedirs(history_dir)
 
 
-    block_number=30
-    location_number=15
+    block_number=15
+    location_number=10
     transporter_type=2
     transporter_number=6
     dis_high=3000
