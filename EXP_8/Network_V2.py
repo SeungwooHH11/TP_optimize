@@ -25,7 +25,13 @@ class ConvLayer(nn.Module):
         self.bn1 = nn.BatchNorm1d(2 * self.out_fea_len).to(device)
         self.bn2 = nn.BatchNorm1d(self.out_fea_len).to(device)
         self.softplus2 = nn.Softplus()
+        self._initialize_weights()
 
+    
+    def _initialize_weights(self, init_min=-0.16, init_max=0.16):
+        for param in self.parameters():
+            nn.init.uniform_(param.data, init_min, init_max)
+    
     def forward(self, node_in_fea, edge_fea, edge_fea_idx):
         N, M = edge_fea_idx.shape
         # convolution
@@ -68,6 +74,11 @@ class CrystalGraphConvNet(nn.Module):
         self.act_fun = nn.ELU()
 
         self.fc_out = nn.Linear(h_fea_len, 1).to(device)
+        self._initialize_weights()
+                     
+    def _initialize_weights(self, init_min=-0.08, init_max=0.08):
+        for param in self.parameters():
+            nn.init.uniform_(param.data, init_min, init_max)
 
     def forward(self, node_fea, edge_fea, edge_fea_idx):
         node_fea = self.embedding(node_fea)  # N,fea
@@ -266,7 +277,7 @@ class PPO(nn.Module):
         self.optimizer.zero_grad()
         loss.mean().backward()
         self.optimizer.step()
-        if step1 % 200 == 0:
+        if step1 % 1000 == 0:
             torch.save({
                 'model_state_dict': self.state_dict(),
                 'optimizer_state_dict': self.optimizer.state_dict(),
