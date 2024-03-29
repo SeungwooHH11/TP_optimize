@@ -28,7 +28,7 @@ if __name__=="__main__":
     gap=60
     K_epoch=2
     Pr_sampler=Problem_sampling(block_number,location_number,transporter_type,transporter_number,dis_high,dis_low,ready_high,tardy_high,gap)
-    ppo=PPO( learning_rate=0.0005, lmbda=0.95, gamma=1, alpha=0.5, beta=0.01, epsilon=0.2, discount_factor=1,location_num=location_number)
+    ppo=PPO( learning_rate=0.0003, lmbda=0.95, gamma=1, alpha=0.5, beta=0.01, epsilon=0.2, discount_factor=1,location_num=location_number)
 
     number_of_problem=5  # 한번에 몇개의 문제를
     number_of_batch=10  # 문제당 몇 episode씩 한번에 학습할껀지
