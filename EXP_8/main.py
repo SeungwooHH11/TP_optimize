@@ -1,5 +1,5 @@
-from Simulation_V4 import *
-from Network_V2 import *
+from Simulation_V5 import *
+from Network_V3 import *
 import vessl
 
 
@@ -16,10 +16,10 @@ if __name__=="__main__":
         os.makedirs(history_dir)
 
 
-    block_number=20
-    location_number=15
+    block_number=21
+    location_number=10
     transporter_type=2
-    transporter_number=4
+    transporter_number=6
     dis_high=3000
     dis_low=500
     ready_high=100 # 이거 낮추자,
@@ -29,9 +29,9 @@ if __name__=="__main__":
     Pr_sampler=Problem_sampling(block_number,location_number,transporter_type,transporter_number,dis_high,dis_low,ready_high,tardy_high,gap)
     ppo=PPO( learning_rate=0.0005, lmbda=0.95, gamma=1, alpha=0.5, beta=0.01, epsilon=0.2, discount_factor=1,location_num=location_number)
 
-    number_of_problem=20  # 한번에 몇개의 문제를
+    number_of_problem=10  # 한번에 몇개의 문제를
     number_of_batch=10  # 문제당 몇 episode씩 한번에 학습할껀지
-    number_of_trial=100  # #이를 몇번 반복할껀지
+    number_of_trial=5000  # #이를 몇번 반복할껀지
     number_of_iteration=10  # 전체 iteration #iteration 단위로 문제 변화
     problem = []
     Control_result=np.zeros((number_of_iteration*number_of_problem,7,6))
@@ -49,10 +49,10 @@ if __name__=="__main__":
 
 
             for nu,mod in enumerate(mode_list):
-                rs=np.zeros(1000)
-                es=np.zeros(1000)
-                ts=np.zeros(1000)
-                for k in range(1000):
+                rs=np.zeros(100)
+                es=np.zeros(100)
+                ts=np.zeros(100)
+                for k in range(100):
                     reward_sum, tardy_sum, ett_sum, event, episode, actions, probs, rewards, dones = simulation(
                         problem[j][0], problem[j][1], problem[j][2], problem[j][3], problem[j][4], problem[j][5],
                         problem[j][6], problem[j][7], problem[j][8], problem[j][9], mod, ppo)
