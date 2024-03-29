@@ -28,9 +28,17 @@ class ConvLayer(nn.Module):
         self._initialize_weights()
 
     
-    def _initialize_weights(self, init_min=-0.16, init_max=0.16):
-        for param in self.parameters():
-            nn.init.uniform_(param.data, init_min, init_max)
+    def initialize_weights(self):
+        for m in self.modules():
+            if isinstance(m, nn.Linear):
+                # He 초기화를 사용하여 가중치를 초기화합니다.
+                nn.init.kaiming_uniform_(m.weight, mode='fan_in', nonlinearity='relu')
+                # 편향을 0으로 초기화합니다.
+                nn.init.zeros_(m.bias)
+            elif isinstance(m, nn.BatchNorm1d):
+                # 배치 정규화 레이어의 가중치를 초기화합니다.
+                nn.init.ones_(m.weight)
+                nn.init.zeros_(m.bias)
     
     def forward(self, node_in_fea, edge_fea, edge_fea_idx):
         N, M = edge_fea_idx.shape
@@ -76,10 +84,18 @@ class CrystalGraphConvNet(nn.Module):
         self.fc_out = nn.Linear(h_fea_len, 1).to(device)
         self._initialize_weights()
                      
-    def _initialize_weights(self, init_min=-0.08, init_max=0.08):
-        for param in self.parameters():
-            nn.init.uniform_(param.data, init_min, init_max)
-
+    def initialize_weights(self):
+        for m in self.modules():
+            if isinstance(m, nn.Linear):
+                # He 초기화를 사용하여 가중치를 초기화합니다.
+                nn.init.kaiming_uniform_(m.weight, mode='fan_in', nonlinearity='relu')
+                # 편향을 0으로 초기화합니다.
+                nn.init.zeros_(m.bias)
+            elif isinstance(m, nn.BatchNorm1d):
+                # 배치 정규화 레이어의 가중치를 초기화합니다.
+                nn.init.ones_(m.weight)
+                nn.init.zeros_(m.bias)
+        
     def forward(self, node_fea, edge_fea, edge_fea_idx):
         node_fea = self.embedding(node_fea)  # N,fea
         node_fea = self.convs1(node_fea, edge_fea, edge_fea_idx)
@@ -111,10 +127,18 @@ class MLP(nn.Module):
         self.fc4 = nn.Linear(128, output_size)
         self._initialize_weights()
 
-    def _initialize_weights(self, init_min=-0.08, init_max=0.08):
-        for param in self.parameters():
-            nn.init.uniform_(param.data, init_min, init_max)
-
+    def initialize_weights(self):
+        for m in self.modules():
+            if isinstance(m, nn.Linear):
+                # He 초기화를 사용하여 가중치를 초기화합니다.
+                nn.init.kaiming_uniform_(m.weight, mode='fan_in', nonlinearity='relu')
+                # 편향을 0으로 초기화합니다.
+                nn.init.zeros_(m.bias)
+            elif isinstance(m, nn.BatchNorm1d):
+                # 배치 정규화 레이어의 가중치를 초기화합니다.
+                nn.init.ones_(m.weight)
+                nn.init.zeros_(m.bias)
+                
     def forward(self, x):
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
@@ -161,7 +185,7 @@ class PPO(nn.Module):
         action_probability = self.pi(action_variable)
         return action_probability
 
-    def get_action(self, node_fea, edge_fea, edge_fea_idx, distance, tp_type):
+    def get_action(self, node_fea, edge_fea, edge_fea_idx, mask, distance, tp_type):
         with torch.no_grad():
             N, M = edge_fea_idx.shape
             # print(edge_fea_idx)
@@ -171,9 +195,6 @@ class PPO(nn.Module):
             # print(state)
             probs = self.calculate_pi(state, node_fea, edge_fea, edge_fea_idx, distance, tp_type)
             # print(probs) # type0 weight 작다
-            mask = torch.where((edge_fea_idx >= 0) & (edge_fea[:, :, 4] <= tp_type), torch.tensor(0),
-                               torch.tensor(1)).unsqueeze(2)
-
             logits_masked = probs - 1e8 * mask
             # print(logits_masked)
             prob = torch.softmax(logits_masked.flatten() - torch.max(logits_masked.flatten()), dim=-1)
@@ -196,7 +217,7 @@ class PPO(nn.Module):
         en_loss = 0
         v_loss = 0
         p_loss = 0
-        # data-> episode-> state [30,16,4]  node_fea (9,13),edge_fea (9,3,5),edge_fea_idx(9,3),distance (9,3) type (1)
+        # data-> episode-> state [30,16,5]  node_fea (9,13),edge_fea (9,3,5),edge_fea_idx(9,3), distance (9,3) type (1), mask(9,3), 
         # probs [30*15] numpy
         # rewards [30*15]
         # action [30*15]
@@ -220,9 +241,10 @@ class PPO(nn.Module):
                 state_gnn = self.calculate_GNN(state[0], state[1], state[2])
 
                 if step < len(episode) - 1:
+                    #data(state):  node_fea (9,13),edge_fea (9,3,5),edge_fea_idx(9,3),  distance (9,3) type (1), mask(9,3)
+                    #cal_pi:  state_gnn, node_fea, edge_fea, edge_fea_idx, distance, tp_type)
                     prob_a = self.calculate_pi(state_gnn, state[0], state[1], state[2], state[3], state[4])
-                    mask = torch.where((state[2] >= 0) & (state[1][:, :, 4] <= state[4]), torch.tensor(0),
-                                       torch.tensor(1)).unsqueeze(2).to(device)
+                    mask = state[5]
                     logits_maksed = prob_a - 1e8 * mask
                     prob = torch.softmax(logits_maksed.flatten() - torch.max(logits_maksed.flatten()), dim=-1)
                     pi_a = prob[int(action[sw])]
