@@ -119,22 +119,26 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
         if mode == 'RL':
             #masking action
             valid_coords = ((edge_fea_idx >= 0) & (transporter[agent][0] >= edge_fea[:, :, 4])).nonzero()
-            pri=np.zeros((valid_coords.shape[0],6))
-            mask=np.zeros((N,M))
+            pri=np.zeros((6,valid_coords.shape[0]))
+            mask=np.ones((N,M))
             action_list=[]
             for i in range(valid_coords.shape[0]):
                 n=valid_coords[i][0]
                 e=valid_coords[i][1]
-                pri[i][0]=max(dis[int(start_location)][n]/120/tardy_high,edge_fea[n,e,1].item())+edge_fea[n,e,0].item()
-                pri[i][1]=dis[int(start_location)][n] / 120 / tardy_high
-                pri[i][2]=edge_fea[n,e,1].item()
-                pri[i][3]=-(1/edge_fea[n,e,0]*torch.exp(-(edge_fea[n,e,2])/(torch.sum(edge_fea[:,:,0])/valid_coords.shape[0]))).item()
-                pri[i][4]=edge_fea[n,e,2].item()
-                pri[i][5]=-(1/edge_fea[n,e,0]*(1-(edge_fea[n,e,2]/edge_fea[n,e,0]))).item()
+                pri[0][i]=max(dis[int(start_location)][n]/120/tardy_high,edge_fea[n,e,1].item())+edge_fea[n,e,0].item()
+                pri[1][i]=dis[int(start_location)][n] / 120 / tardy_high
+                pri[2][i]=edge_fea[n,e,1].item()
+                pri[3][i]=-(1/edge_fea[n,e,0]*torch.exp(-(edge_fea[n,e,2])/(torch.sum(edge_fea[:,:,0])/valid_coords.shape[0]))).item()
+                pri[4][i]=edge_fea[n,e,2].item()
+                pri[5][i]=-(1/edge_fea[n,e,0]*(1-(edge_fea[n,e,2]/edge_fea[n,e,0]))).item()
             min_values = np.min(pri, axis=1)  # 각 행의 최소값 찾기
             expanded_min_values = min_values[:, np.newaxis]  # 차원 확장하여 배열의 형태 맞추기
             min_indices = np.argwhere(pri == expanded_min_values)
-            mask[min_indices[:, 0], min_indices[:, 1]] = 1
+            for i in min_indices:
+                n=valid_coords[i[1]][0].item()
+                e=valid_coords[i[1]][1].item()
+                mask[n,e,0]=0
+            
             episode.append(
             [node_fea.clone(), edge_fea.clone(), edge_fea_idx.clone(), distance.clone(), transporter[agent][0]],mask)
             action, i, j, prob = ppo.get_action(node_fea, edge_fea, edge_fea_idx, mask,distance, transporter[agent][0])
