@@ -138,7 +138,7 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
                 n=valid_coords[i[1]][0].item()
                 e=valid_coords[i[1]][1].item()
                 mask[n,e,0]=0
-            mask=torch.tensor(mask).to('device')
+            mask=torch.tensor(mask).to(device)
             episode.append(
             [node_fea.clone(), edge_fea.clone(), edge_fea_idx.clone(), distance.clone(), transporter[agent][0],mask])
             action, i, j, prob = ppo.get_action(node_fea, edge_fea, edge_fea_idx, mask,distance, transporter[agent][0])
