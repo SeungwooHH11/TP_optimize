@@ -115,8 +115,7 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
         start_location = transporter[agent][1]
         distance = torch.tensor(dis[int(start_location)]/120/tardy_high, dtype=torch.float32).unsqueeze(1).repeat(1,edge_fea_idx.shape[1]).to(device)  #(n, e)
 
-        episode.append(
-            [node_fea.clone(), edge_fea.clone(), edge_fea_idx.clone(), distance.clone(), transporter[agent][0]])
+        
         if mode == 'RL':
             #masking action
             valid_coords = ((edge_fea_idx >= 0) & (transporter[agent][0] >= edge_fea[:, :, 4])).nonzero()
@@ -137,6 +136,8 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
             expanded_min_values = min_values[:, np.newaxis]  # 차원 확장하여 배열의 형태 맞추기
             min_indices = np.argwhere(array == expanded_min_values)
             mask[min_indices[:, 0], min_indices[:, 1]] = 1
+            episode.append(
+            [node_fea.clone(), edge_fea.clone(), edge_fea_idx.clone(), distance.clone(), transporter[agent][0]],mask)
             action, i, j, prob = ppo.get_action(node_fea, edge_fea, edge_fea_idx, mask,distance, transporter[agent][0])
 
         elif mode == 'Random':
