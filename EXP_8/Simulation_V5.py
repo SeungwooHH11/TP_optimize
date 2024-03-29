@@ -120,7 +120,7 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
             #masking action
             valid_coords = ((edge_fea_idx >= 0) & (transporter[agent][0] >= edge_fea[:, :, 4])).nonzero()
             pri=np.zeros((6,valid_coords.shape[0]))
-            mask=np.ones((N,M))
+            mask=np.ones((N,M,1))
             action_list=[]
             for i in range(valid_coords.shape[0]):
                 n=valid_coords[i][0]
