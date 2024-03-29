@@ -27,11 +27,11 @@ if __name__=="__main__":
     gap=60
     K_epoch=2
     Pr_sampler=Problem_sampling(block_number,location_number,transporter_type,transporter_number,dis_high,dis_low,ready_high,tardy_high,gap)
-    ppo=PPO( learning_rate=0.0005, lmbda=0.95, gamma=1, alpha=0.5, beta=0.01, epsilon=0.2, discount_factor=1,location_num=location_number)
+    ppo=PPO( learning_rate=0.0003, lmbda=0.95, gamma=1, alpha=0.5, beta=0.01, epsilon=0.2, discount_factor=1,location_num=location_number)
 
     number_of_problem=10  # 한번에 몇개의 문제를
     number_of_batch=10  # 문제당 몇 episode씩 한번에 학습할껀지
-    number_of_trial=3000  # #이를 몇번 반복할껀지
+    number_of_trial=10000  # #이를 몇번 반복할껀지
     number_of_iteration=1  # 전체 iteration #iteration 단위로 문제 변화
     problem = []
     Control_result=np.zeros((number_of_iteration*number_of_problem,7,6))
@@ -49,10 +49,10 @@ if __name__=="__main__":
 
 
             for nu,mod in enumerate(mode_list):
-                rs=np.zeros(1000)
-                es=np.zeros(1000)
-                ts=np.zeros(1000)
-                for k in range(1000):
+                rs=np.zeros(200)
+                es=np.zeros(200)
+                ts=np.zeros(200)
+                for k in range(200):
                     reward_sum, tardy_sum, ett_sum, event, episode, actions, probs, rewards, dones = simulation(
                         problem[j][0], problem[j][1], problem[j][2], problem[j][3], problem[j][4], problem[j][5],
                         problem[j][6], problem[j][7], problem[j][8], problem[j][9], mod, ppo)
