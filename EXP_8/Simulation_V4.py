@@ -92,7 +92,8 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
     edge_fea = torch.tensor(edge_fea, dtype=torch.float32).to(device)
     edge_fea_idx = torch.tensor(edge_fea_idx, dtype=torch.int32).to(device)
     block_done_matrix = torch.where(edge_fea_idx < 0, torch.tensor(0), torch.tensor(1))
-
+    N=efge_fea_idx.shape[0]
+    M=efge_fea_idx.shape[1]
     episode = []  # torch node_fea (9,13), edge_fea (9,3,5), edge_fea_idx(9,3), distance (9,3)
     probs = np.zeros(B)
     rewards = np.zeros(B)
@@ -117,7 +118,27 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
         episode.append(
             [node_fea.clone(), edge_fea.clone(), edge_fea_idx.clone(), distance.clone(), transporter[agent][0]])
         if mode == 'RL':
-            action, i, j, prob = ppo.get_action(node_fea, edge_fea, edge_fea_idx, distance, transporter[agent][0])
+            #masking action
+            valid_coords = ((edge_fea_idx >= 0) & (transporter[agent][0] >= edge_fea[:, :, 4])).nonzero()
+            pri=np.zeros((valid_coords.shape[0],6))
+            mask=np.zeros((N,M))
+            action_list=[]
+            for i in range(valid_coords.shape[0]):
+                n=valid_coords[i][0]
+                e=valid_coords[i][1]
+                pri[i][0]=max(dis[int(start_location)][n]/120/tardy_high,edge_fea[n,e,1].item())+edge_fea[n,e,0].item()
+                pri[i][1]=dis[int(start_location)][n] / 120 / tardy_high
+                pri[i][2]=edge_fea[n,e,1].item()
+                pri[i][3]=-(1/edge_fea[n,e,0]*torch.exp(-(edge_fea[n,e,2])/(torch.sum(edge_fea[:,:,0])/valid_coords.shape[0]))).item()
+                pri[i][4]=edge_fea[n,e,2].item()
+                pri[i][5]=-(1/edge_fea[n,e,0]*(1-(edge_fea[n,e,2]/edge_fea[n,e,0]))).item()
+
+            min_values = np.min(pri, axis=1)  # 각 행의 최소값 찾기
+            expanded_min_values = min_values[:, np.newaxis]  # 차원 확장하여 배열의 형태 맞추기
+            min_indices = np.argwhere(array == expanded_min_values)
+            mask[min_indices[:, 0], min_indices[:, 1]] = 1
+            action, i, j, prob = ppo.get_action(node_fea, edge_fea, edge_fea_idx, mask,distance, transporter[agent][0])
+
         elif mode == 'Random':
             valid_coords = ((edge_fea_idx >= 0) & (transporter[agent][0] >= edge_fea[:, :, 4])).nonzero()
             num_valid_coords = valid_coords.shape[0]
@@ -232,7 +253,7 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
             for i in range(valid_coords.shape[0]):
                 n = valid_coords[i][0]
                 e = valid_coords[i][1]
-                pt[i] -(1/edge_fea[n,e,0]*(1-(edge_fea[n,e,2]/edge_fea[n,e,0]))).item()
+                pt[i] =-(1/edge_fea[n,e,0]*(1-(edge_fea[n,e,2]/edge_fea[n,e,0]))).item()
             min_index = np.argmin(pt)  # 가장 작은 값의 인덱스 찾기
 
             # 같은 값이 여러 개인 경우 처리
