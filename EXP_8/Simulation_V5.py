@@ -135,6 +135,7 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
             expanded_min_values = min_values[:, np.newaxis]  # 차원 확장하여 배열의 형태 맞추기
             min_indices = np.argwhere(pri == expanded_min_values)
             for i in min_indices:
+                print(i)
                 n=valid_coords[i[1]][0].item()
                 e=valid_coords[i[1]][1].item()
                 mask[n,e,0]=0
