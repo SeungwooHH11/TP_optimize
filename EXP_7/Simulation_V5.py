@@ -134,7 +134,7 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
 
             min_values = np.min(pri, axis=1)  # 각 행의 최소값 찾기
             expanded_min_values = min_values[:, np.newaxis]  # 차원 확장하여 배열의 형태 맞추기
-            min_indices = np.argwhere(array == expanded_min_values)
+            min_indices = np.argwhere(pri == expanded_min_values)
             mask[min_indices[:, 0], min_indices[:, 1]] = 1
             episode.append(
             [node_fea.clone(), edge_fea.clone(), edge_fea_idx.clone(), distance.clone(), transporter[agent][0]],mask)
