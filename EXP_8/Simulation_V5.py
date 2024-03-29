@@ -1,4 +1,4 @@
-from Network_V2 import *
+from Network_V3 import *
 import os
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 import torch
@@ -92,8 +92,8 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
     edge_fea = torch.tensor(edge_fea, dtype=torch.float32).to(device)
     edge_fea_idx = torch.tensor(edge_fea_idx, dtype=torch.int32).to(device)
     block_done_matrix = torch.where(edge_fea_idx < 0, torch.tensor(0), torch.tensor(1))
-    N=efge_fea_idx.shape[0]
-    M=efge_fea_idx.shape[1]
+    N=edge_fea_idx.shape[0]
+    M=edge_fea_idx.shape[1]
     episode = []  # torch node_fea (9,13), edge_fea (9,3,5), edge_fea_idx(9,3), distance (9,3)
     probs = np.zeros(B)
     rewards = np.zeros(B)
