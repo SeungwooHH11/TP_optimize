@@ -114,14 +114,13 @@ if __name__=="__main__":
                 ave_loss, v_loss, p_loss = ppo.update(data, prob_list, reward_list, action_list, done_list,step,model_dir)
                 loss_temp += ave_loss
             history[step,0]=ave_reward
-            #vessl.log(step=step, payload={'average_reward': ave_reward})
+            vessl.log(step=step, payload={'average_reward': ave_reward})
             history[step,1]=loss_temp/K_epoch
-            #vessl.log(step=step, payload={'loss': loss_temp/K_epoch})
+            vessl.log(step=step, payload={'loss': loss_temp/K_epoch})
             history[step,2]=ave_ett
-            #vessl.log(step=step, payload={'average_ett': ave_ett})
+            vessl.log(step=step, payload={'average_ett': ave_ett})
             history[step,3]=ave_tardy
-            #vessl.log(step=step, payload={'average_tardy': ave_tardy})
-            print(ave_reward)
+            vessl.log(step=step, payload={'average_tardy': ave_tardy})
             step += 1
 
     history=pd.DataFrame(history)
