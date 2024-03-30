@@ -30,9 +30,8 @@ if __name__=="__main__":
     temp_dis=dis_low/Pr_sampler.Dis
     indices = np.diag_indices(min(temp_dis.shape))
     temp_dis[indices] = 0
-    print(Pr_sampler.Dis)
+    
     dis=torch.tensor(temp_dis,dtype=torch.float32).to(device)
-    print(dis)
     ppo=PPO( learning_rate=0.001, lmbda=0.95, gamma=1, alpha=0.5, beta=0.01, epsilon=0.2, discount_factor=1,location_num=location_number,dis=dis)
 
     number_of_problem=5  # 한번에 몇개의 문제를
