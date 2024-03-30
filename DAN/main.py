@@ -15,7 +15,7 @@ if __name__=="__main__":
     if not os.path.exists(history_dir):
         os.makedirs(history_dir)
 
-    device='cpu'
+    device='cuda'
     block_number=21
     location_number=10
     transporter_type=2
