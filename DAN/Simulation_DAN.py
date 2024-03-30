@@ -4,7 +4,7 @@ os.environ['KMP_DUPLICATE_LIB_OK']='True'
 import torch
 import random
 import matplotlib.pyplot as plt
-device='cpu'
+device='cuda'
 import numpy as np
 
 
