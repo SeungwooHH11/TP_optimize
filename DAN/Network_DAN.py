@@ -9,7 +9,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.distributions import Categorical
 
-device = 'cpu'
+device = 'cuda'
 
 
 class ConvLayer(nn.Module):
