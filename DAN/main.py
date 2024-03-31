@@ -93,6 +93,7 @@ if __name__=="__main__":
             ave_reward = 0
             ave_tardy = 0
             ave_ett = 0
+            loss_temp = 0
             for j in range(number_of_problem):
                 for l in range(number_of_batch):
                     reward_sum, tardy_sum, ett_sum, event, episode, actions, probs, rewards, dones = simulation(
@@ -113,7 +114,7 @@ if __name__=="__main__":
             ave_reward = float(ave_reward) / number_of_problem / number_of_batch
             ave_ett = float(ave_ett) / number_of_problem /number_of_batch
             ave_tardy = float(ave_tardy) / number_of_problem / number_of_batch
-            loss_temp = 0
+            
             history[step,0]=ave_reward
             vessl.log(step=step, payload={'average_reward': ave_reward})
             history[step,1]=loss_temp/K_epoch
