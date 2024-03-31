@@ -282,7 +282,7 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
             i = valid_coords[action][0].item()
             j = valid_coords[action][1].item()
 
-        transporter, block_done_matrix, edge_fea_idx, node_fea, edge_fea, event_list,ett = do_action(transporter,
+        transporter, block_done_matrix, edge_fea_idx, node_fea, edge_fea, event_list = do_action(transporter,
                                                                                                  block_done_matrix,
                                                                                                  edge_fea_idx.clone(),
                                                                                                  node_fea.clone(),
@@ -306,7 +306,7 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
                 transporter, block_done_matrix, edge_fea_idx, node_fea, edge_fea, tardiness,  mintime, next_agent)
             agent = next_agent
             temp_tardy += tardy
-
+            temp_ett+=empty_travel_time
             time += mintime
             valid_coords = ((edge_fea_idx >= 0) & (transporter[agent][0] >= edge_fea[:, :, 4])).nonzero()
             num_valid_coords = valid_coords.shape[0]
@@ -314,7 +314,7 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
                 transporter[agent][2] = float("inf")
         tardy_sum += temp_tardy
         ett_sum += ett
-        reward = temp_tardy + ett
+        reward = temp_tardy + temp_ett
         event_list.append(round(temp_tardy, 3))
         event_list.append(round(temp_ett, 3))
         event_list.append(round(reward, 3))
@@ -347,7 +347,7 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
     tardiness_next = edge_fea[:, :, 2][edge_fea[:, :, 2] < 0].sum().item()
     temp_tardy = tardiness_next - tardiness
     tardy_sum += temp_tardy
-
+    ett_sum+=temp_ett
     reward = temp_tardy + temp_ett
     rewards[step] += reward
     reward_sum += reward
