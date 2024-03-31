@@ -313,7 +313,7 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
             if num_valid_coords == 0:
                 transporter[agent][2] = float("inf")
         tardy_sum += temp_tardy
-        ett_sum += ett
+        ett_sum +=temp_ett
         reward = temp_tardy + temp_ett
         event_list.append(round(temp_tardy, 3))
         event_list.append(round(temp_ett, 3))
@@ -363,7 +363,7 @@ def do_action(transporter, block_done_matrix, edge_fea_idx, node_fea, edge_fea, 
               tardy_high):
     past_location = int(transporter[agent][1])
     transporter[agent][3] = dis[int(transporter[agent][1]), i] /120 / tardy_high
-    ett=-transporter[agent][3]
+  
     transporter[agent][2] = (max(dis[int(transporter[agent][1]), i] /120 / tardy_high, edge_fea[i][j][1].item()) + edge_fea[i][j][0].item())
     transporter[agent][1] = edge_fea_idx[i][j].item()
     transporter[agent][4] = i
@@ -382,7 +382,7 @@ def do_action(transporter, block_done_matrix, edge_fea_idx, node_fea, edge_fea, 
     node_fea[int(transporter[agent][1])][int(transporter[agent][0]) * 2 + 1] = (node_fea[int(transporter[agent][1])][int(transporter[agent][0]) * 2 + 1] *node_fea[int(transporter[agent][1])][int(transporter[agent][0]) * 2] +transporter[agent][2]) / (node_fea[int(transporter[agent][1])][int(transporter[agent][0]) * 2] + 1)
     node_fea[int(transporter[agent][1])][int(transporter[agent][0]) * 2] += 1
     edge_fea_idx[i][j] = -1
-    return transporter, block_done_matrix, edge_fea_idx, node_fea, edge_fea, event_list,ett
+    return transporter, block_done_matrix, edge_fea_idx, node_fea, edge_fea, event_list
 
 
 def next_state(transporter, block_done_matrix, edge_fea_idx, node_fea, edge_fea,  tardiness, min_time,
