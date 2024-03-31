@@ -16,7 +16,7 @@ if __name__=="__main__":
         os.makedirs(history_dir)
 
     device='cuda'
-    block_number=12
+    block_number=21
     location_number=10
     transporter_type=2
     transporter_number=6
@@ -36,7 +36,7 @@ if __name__=="__main__":
 
     number_of_problem=8 # 한번에 몇개의 문제를
     number_of_batch=32 # 문제당 몇 episode씩 한번에 학습할껀지
-    number_of_trial=3000  # #이를 몇번 반복할껀지
+    number_of_trial=5000  # #이를 몇번 반복할껀지
     number_of_iteration=10  # 전체 iteration #iteration 단위로 문제 변화
     problem = []
     Control_result=np.zeros((number_of_iteration*number_of_problem,7,6))
@@ -106,13 +106,13 @@ if __name__=="__main__":
                     prob_list = np.concatenate((prob_list, probs))
                     reward_list = np.concatenate((reward_list, rewards))
                     done_list = np.concatenate((done_list, dones))
+                for m in range(K_epoch):
+                    ave_loss, v_loss, p_loss = ppo.update(data, prob_list, reward_list, action_list, done_list,step,model_dir)
+                    loss_temp += ave_loss
             ave_reward = float(ave_reward) / number_of_problem / number_of_batch
             ave_ett = float(ave_ett) / number_of_problem /number_of_batch
             ave_tardy = float(ave_tardy) / number_of_problem / number_of_batch
             loss_temp = 0
-            for m in range(K_epoch):
-                ave_loss, v_loss, p_loss = ppo.update(data, prob_list, reward_list, action_list, done_list,step,model_dir)
-                loss_temp += ave_loss
             history[step,0]=ave_reward
             vessl.log(step=step, payload={'average_reward': ave_reward})
             history[step,1]=loss_temp/K_epoch
