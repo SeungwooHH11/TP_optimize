@@ -85,17 +85,17 @@ if __name__=="__main__":
             print(mod,Control_result[past_time_step:temp_step,nu,0].mean(),Control_result[past_time_step:temp_step,nu,2].mean(),Control_result[past_time_step:temp_step,nu,4].mean())
         past_time_step = temp_step
         for k in range(number_of_trial):
-            
+            ave_reward = 0
+            ave_tardy = 0
+            ave_ett = 0
+            loss_temp = 0
             for j in range(number_of_problem):
                 data = [] #batch
                 action_list = np.array([])
                 prob_list = np.array([])
                 reward_list = np.array([])
                 done_list = np.array([])
-                ave_reward = 0
-                ave_tardy = 0
-                ave_ett = 0
-                loss_temp = 0
+                
                 for l in range(number_of_batch):
                     reward_sum, tardy_sum, ett_sum, event, episode, actions, probs, rewards, dones = simulation(
                         problem[j][0], problem[j][1], problem[j][2], problem[j][3], problem[j][4], problem[j][5],
