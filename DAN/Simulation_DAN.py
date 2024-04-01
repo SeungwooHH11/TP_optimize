@@ -109,7 +109,7 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
     time = 0
     prob = 0
     num_valid_coords = 10
-    agent = np.random.randint(0, T) #랜덤 트랜스포터 부터 지정
+    agent = np.random.randint(0, int(T/2)) #랜덤 트랜스포터 부터 지정
     node_fea[int(transporter[agent][1])][int(transporter[agent][0]) * 2] -= 1
     while unvisited_num > 0:
 
@@ -121,6 +121,7 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
         if mode == 'RL':
             #masking action
             valid_coords = ((edge_fea_idx >= 0) & (transporter[agent][0] >= edge_fea[:, :, 4])).nonzero()
+
             pri=np.zeros((6,valid_coords.shape[0]))
             mask=np.ones((N,M,1))
             action_list=[]
@@ -133,21 +134,20 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
                 pri[3][i]=-(1/edge_fea[n,e,0]*torch.exp(-(edge_fea[n,e,2])/(torch.sum(edge_fea[:,:,0])/valid_coords.shape[0]))).item()
                 pri[4][i]=edge_fea[n,e,2].item()
                 pri[5][i]=-(1/edge_fea[n,e,0]*(1-(edge_fea[n,e,2]/edge_fea[n,e,0]))).item()
-            sorted_matrix = np.sort(pri, axis=1)
-            min_values = sorted_matrix[:, :1]  # 최소값
-            second_min_values = np.where(sorted_matrix[:, 1:2] != min_values, sorted_matrix[:, 1:2],sorted_matrix[:, 2:3])
-
-            for i, (min_val_row, sec_min_val_row) in enumerate(zip(min_values, second_min_values)):
-                min_pos = np.column_stack(np.where(pri[i] == min_val_row))
-                sec_min_pos = np.column_stack(np.where(pri[i] == sec_min_val_row))
-                for j in min_pos:
-                    n=valid_coords[j[0]][0].item()
-                    e=valid_coords[j[0]][1].item()
+            for i in range(6):
+                value=np.unique(pri[i])
+                value1=value[0]
+                for j in np.where(value1==pri[i])[0]:
+                    n = valid_coords[j][0].item()
+                    e = valid_coords[j][1].item()
                     mask[n, e, 0] = 0
-                for j in sec_min_pos:
-                    n = valid_coords[j[0]][0].item()
-                    e = valid_coords[j[0]][1].item()
-                    mask[n,e,0]=0
+                if len(value)>1:
+                    value2 = value[1]
+                    for j in np.where(value2 == pri[i])[0]:
+                        n = valid_coords[j][0].item()
+                        e = valid_coords[j][1].item()
+                        mask[n, e, 0] = 0
+
             mask=torch.tensor(mask).to(device)
             episode.append(
             [node_fea.clone(), edge_fea.clone(), edge_fea_idx.clone(), distance.clone(), transporter[agent][0],mask])
@@ -301,6 +301,9 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
             probs[step] = prob
             dones[step] = 0
             rewards[step] = reward
+            episode.append(
+                [node_fea.clone(), edge_fea.clone(), edge_fea_idx.clone(), distance.clone(), transporter[agent][0],
+                 mask])
             break
         sw = 0  # do while
 
@@ -309,7 +312,7 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
         while (((num_valid_coords <= 0) | (sw == 0))):
             sw = 1
 
-            next_agent, mintime = select_agent(transporter[:, 2])
+            next_agent, mintime = select_agent(transporter)
             
             transporter, edge_fea_idx, node_fea, edge_fea, tardiness, tardy = next_state(
                 transporter,  edge_fea_idx, node_fea, edge_fea, tardiness,  mintime, next_agent)
@@ -401,10 +404,16 @@ def next_state(transporter, edge_fea_idx, node_fea, edge_fea,  tardiness, min_ti
     return transporter,  edge_fea_idx, node_fea, edge_fea, tardiness_next, tardy
 
 
-def select_agent(event):
-    argmin = np.where(event.min() == event)
-    agent = int(random.choice(argmin[0]))
-    min_time = event[agent]
+def select_agent(transporter):
+    event=transporter[:,2]
+    min_time=event.min()
+    argmin = np.where( (min_time == transporter[:,2]) & (transporter[:,0]==0))[0]
+
+    if len(argmin)>0:
+        agent = int(random.choice(argmin))
+    else:
+        argmin = np.where((min_time == transporter[:, 2]) )[0]
+        agent = int(random.choice(argmin))
     return agent, min_time
 
 
