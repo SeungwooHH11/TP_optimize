@@ -85,6 +85,8 @@ if __name__=="__main__":
             print(mod,Control_result[past_time_step:temp_step,nu,0].mean(),Control_result[past_time_step:temp_step,nu,2].mean(),Control_result[past_time_step:temp_step,nu,4].mean())
         past_time_step = temp_step
         for k in range(number_of_trial):
+            
+            for j in range(number_of_problem):
             data = [] #batch
             action_list = np.array([])
             prob_list = np.array([])
@@ -94,7 +96,6 @@ if __name__=="__main__":
             ave_tardy = 0
             ave_ett = 0
             loss_temp = 0
-            for j in range(number_of_problem):
                 for l in range(number_of_batch):
                     reward_sum, tardy_sum, ett_sum, event, episode, actions, probs, rewards, dones = simulation(
                         problem[j][0], problem[j][1], problem[j][2], problem[j][3], problem[j][4], problem[j][5],
@@ -108,9 +109,9 @@ if __name__=="__main__":
                     reward_list = np.concatenate((reward_list, rewards))
                     done_list = np.concatenate((done_list, dones))
             
-            for m in range(K_epoch):
-                ave_loss, v_loss, p_loss = ppo.update(data, prob_list, reward_list, action_list, done_list,step,model_dir)
-                loss_temp += ave_loss
+                for m in range(K_epoch):
+                    ave_loss, v_loss, p_loss = ppo.update(data, prob_list, reward_list, action_list, done_list,step,model_dir)
+                    loss_temp += ave_loss
             ave_reward = float(ave_reward) / number_of_problem / number_of_batch
             ave_ett = float(ave_ett) / number_of_problem /number_of_batch
             ave_tardy = float(ave_tardy) / number_of_problem / number_of_batch
