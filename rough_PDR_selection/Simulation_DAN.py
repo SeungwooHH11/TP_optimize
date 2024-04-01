@@ -32,7 +32,7 @@ class Problem_sampling:
             Block[i, 0], Block[i, 1] = v[0], v[1]
             Block[i, 2] = self.Dis[int(Block[i, 0]), int(Block[i, 1])] / 80 / self.tardy_high   #processing time
             Block[i, 3] = np.random.randint(0, self.ready_high) / self.tardy_high   # ready time
-            Block[i, 4] = np.random.randint(Block[i, 2] +self.gap,self.tardy_high ) / self.tardy_high - Block[i, 2]  # tardy time
+            Block[i, 4] = np.random.randint(Block[i, 3] +self.gap,self.tardy_high ) / self.tardy_high - Block[i, 2]  # tardy time
 
             weight = np.random.uniform(0, 100)
             if weight > 50:
@@ -93,7 +93,7 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
     node_fea = torch.tensor(node_fea, dtype=torch.float32).to(device)
     edge_fea = torch.tensor(edge_fea, dtype=torch.float32).to(device)
     edge_fea_idx = torch.tensor(edge_fea_idx, dtype=torch.long).to(device)
-    block_done_matrix = torch.where(edge_fea_idx < 0, torch.tensor(0), torch.tensor(1))
+
     N=edge_fea_idx.shape[0]
     M=edge_fea_idx.shape[1]
     episode = []  # torch node_fea (9,13), edge_fea (9,3,5), edge_fea_idx(9,3), distance (9,3)
@@ -282,41 +282,51 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
             i = valid_coords[action][0].item()
             j = valid_coords[action][1].item()
 
-        transporter, block_done_matrix, edge_fea_idx, node_fea, edge_fea, event_list = do_action(transporter,
-                                                                                                 block_done_matrix,
+        transporter,  edge_fea_idx, node_fea, edge_fea, event_list,ett,td =do_action(transporter,
                                                                                                  edge_fea_idx.clone(),
                                                                                                  node_fea.clone(),
                                                                                                  edge_fea.clone(),
                                                                                                  agent, i, j, dis, time,
                                                                                                  step_to_ij, tardy_high)
         if unvisited_num == 1:
+            event_list.append(round(td, 3))
+            event_list.append(round(ett, 3))
+            event_list.append(round(td+ett, 3))
+            event.append(event_list)
+            tardy_sum +=td
+            ett_sum += ett
+            reward =  ett +td
+            reward_sum += reward
             actions[step] = action
             probs[step] = prob
             dones[step] = 0
+            rewards[step] = reward
             break
         sw = 0  # do while
 
         temp_tardy = 0
-        temp_ett = 0
+        
         while (((num_valid_coords <= 0) | (sw == 0))):
             sw = 1
 
             next_agent, mintime = select_agent(transporter[:, 2])
-            reward, transporter, block_done_matrix, edge_fea_idx, node_fea, edge_fea, tardiness, tardy, empty_travel_time = next_state(
-                transporter, block_done_matrix, edge_fea_idx, node_fea, edge_fea, tardiness,  mintime, next_agent)
+            
+            transporter, edge_fea_idx, node_fea, edge_fea, tardiness, tardy = next_state(
+                transporter,  edge_fea_idx, node_fea, edge_fea, tardiness,  mintime, next_agent)
             agent = next_agent
             temp_tardy += tardy
-            temp_ett+=empty_travel_time
             time += mintime
+            
             valid_coords = ((edge_fea_idx >= 0) & (transporter[agent][0] >= edge_fea[:, :, 4])).nonzero()
             num_valid_coords = valid_coords.shape[0]
             if num_valid_coords == 0:
                 transporter[agent][2] = float("inf")
+        tardy_sum +=td
         tardy_sum += temp_tardy
-        ett_sum +=temp_ett
-        reward = temp_tardy + temp_ett
-        event_list.append(round(temp_tardy, 3))
-        event_list.append(round(temp_ett, 3))
+        ett_sum += ett
+        reward = temp_tardy + ett +td
+        event_list.append(round(temp_tardy+td, 3))
+        event_list.append(round(ett, 3))
         event_list.append(round(reward, 3))
 
         # event_list 현재 시간, ett,tardy,완료시간,tp,몇번,tardy,ett,reward
@@ -334,45 +344,28 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
         # dis 거리/4000
         # ready time이 0보다 작으면 0으로
         # tardiness는 그떄 발생한 정도 case 1,2,3 0보다 작으면
-    temp_ett = 0
-    temp_tardy = 0  # 잔여 reward 계산
 
-    for i in range(T):
-        if transporter[i][3] >= 0:
-            temp_ett -= transporter[i][3]
-            block_done_matrix[int(transporter[i][4])][int(transporter[i][5])] = 0
-            edge_fea[int(transporter[i][4]), int(transporter[i][5]), 2] -= transporter[i][3]
-            transporter[i][3] = 0
-    episode.append([node_fea, edge_fea, edge_fea_idx, distance, 1])  # dummy set
-    tardiness_next = edge_fea[:, :, 2][edge_fea[:, :, 2] < 0].sum().item()
-    temp_tardy = tardiness_next - tardiness
-    tardy_sum += temp_tardy
-    ett_sum+=temp_ett
-    reward = temp_tardy + temp_ett
-    rewards[step] += reward
-    reward_sum += reward
-    event_list.append(round(temp_tardy, 3))
-    event_list.append(round(temp_ett, 3))
-    event_list.append(round(reward, 3))
-    event.append(event_list)  # event_list 현재 시간, ett,tardy,완료시간,tp,몇번,tardy,ett,reward
+    
+      # event_list 현재 시간, ett,tardy,완료시간,tp,몇번,tardy,ett,reward
+
     return reward_sum, tardy_sum, ett_sum, event, episode, actions, probs, rewards, dones
 
 
 # 각각 action과 next_state로 분리하자
-def do_action(transporter, block_done_matrix, edge_fea_idx, node_fea, edge_fea, agent, i, j, dis, time, step_to_ij,
+def do_action(transporter, edge_fea_idx, node_fea, edge_fea, agent, i, j, dis, time, step_to_ij,
               tardy_high):
     past_location = int(transporter[agent][1])
     transporter[agent][3] = dis[int(transporter[agent][1]), i] /120 / tardy_high
-  
+    ett=-dis[int(transporter[agent][1]), i] /120 / tardy_high
+    td=min(edge_fea[i,j,2].item()-dis[int(transporter[agent][1]), i] /120 / tardy_high,0)-min(edge_fea[i,j,2].item(),0)
     transporter[agent][2] = (max(dis[int(transporter[agent][1]), i] /120 / tardy_high, edge_fea[i][j][1].item()) + edge_fea[i][j][0].item())
     transporter[agent][1] = edge_fea_idx[i][j].item()
     transporter[agent][4] = i
     transporter[agent][5] = j
-    event_list = [round(time, 3), round(transporter[agent][3] + time, 3), round(edge_fea[i][j][2].item() + time, 3),
+    event_list = [round(time, 3), round(transporter[agent][3] + time, 3), round(edge_fea[i][j][2].item() + time+ edge_fea[i][j][0].item(), 3),
                   round(transporter[agent][2] + time, 3), agent,
                   step_to_ij[i][j]]  # event_list 현재 시간, ett 끝 시간 ,tardy 끝 시간 ,완료 시간,tp, 몇번
-    if past_location == i:
-        block_done_matrix[int(transporter[agent][4])][int(transporter[agent][5])] = 0
+
     # 1 TP heading point
     # 2 TP arrival left time
     # 3 empty travel time
@@ -382,23 +375,14 @@ def do_action(transporter, block_done_matrix, edge_fea_idx, node_fea, edge_fea, 
     node_fea[int(transporter[agent][1])][int(transporter[agent][0]) * 2 + 1] = (node_fea[int(transporter[agent][1])][int(transporter[agent][0]) * 2 + 1] *node_fea[int(transporter[agent][1])][int(transporter[agent][0]) * 2] +transporter[agent][2]) / (node_fea[int(transporter[agent][1])][int(transporter[agent][0]) * 2] + 1)
     node_fea[int(transporter[agent][1])][int(transporter[agent][0]) * 2] += 1
     edge_fea_idx[i][j] = -1
-    return transporter, block_done_matrix, edge_fea_idx, node_fea, edge_fea, event_list
+    return transporter, edge_fea_idx, node_fea, edge_fea, event_list,ett,td
 
 
-def next_state(transporter, block_done_matrix, edge_fea_idx, node_fea, edge_fea,  tardiness, min_time,
+def next_state(transporter, edge_fea_idx, node_fea, edge_fea,  tardiness, min_time,
                next_agent):
-    empty_travel_time = 0
+    
 
-    for i in range(len(transporter)):
-        if transporter[i][3] > min_time:
-            transporter[i][3] -= min_time
-            empty_travel_time -= min_time
-        elif transporter[i][3] > 0:
-            empty_travel_time -= transporter[i][3]
-            block_done_matrix[int(transporter[i][4])][int(transporter[i][5])] = 0
-            edge_fea[int(transporter[i][4]), int(transporter[i][5]), 2] -= transporter[i][3]
-            transporter[i][3] = 0
-        transporter[i][2] -= min_time
+    transporter[:,2] -= min_time
     # node_fea
 
     node_fea[:, [1, 3]] = node_fea[:, [1, 3]] - min_time
@@ -406,17 +390,15 @@ def next_state(transporter, block_done_matrix, edge_fea_idx, node_fea, edge_fea,
     node_fea[int(transporter[next_agent][1]), int(transporter[next_agent][0]) * 2] -= 1
 
     # edge_fea
-
-    edge_fea[:, :, [1, 2]] = edge_fea[:, :, [1, 2]] - block_done_matrix.unsqueeze(2).repeat(1, 1, 2) * min_time
+    mask=torch.where(edge_fea_idx >= 0, torch.tensor(1.0), torch.tensor(0.0))
+    edge_fea[:, :, [1, 2]] = edge_fea[:, :, [1, 2]] - mask.unsqueeze(2).repeat(1, 1, 2) * min_time
     edge_fea[:, :, 1][edge_fea[:, :, 1] < 0] = 0
     tardiness_next = edge_fea[:, :, 2][edge_fea[:, :, 2] < 0].sum().item()
-
     tardy = tardiness_next - tardiness
-
-    reward = tardy + empty_travel_time
+    
 
     # tardiness 수정, weight constraint 고려 ready time
-    return reward, transporter, block_done_matrix, edge_fea_idx, node_fea, edge_fea, tardiness_next, tardy, empty_travel_time
+    return transporter,  edge_fea_idx, node_fea, edge_fea, tardiness_next, tardy
 
 
 def select_agent(event):
