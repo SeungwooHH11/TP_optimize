@@ -107,9 +107,9 @@ if __name__=="__main__":
                     prob_list = np.concatenate((prob_list, probs))
                     reward_list = np.concatenate((reward_list, rewards))
                     done_list = np.concatenate((done_list, dones))
-                for m in range(K_epoch):
-                    ave_loss, v_loss, p_loss = ppo.update(data, prob_list, reward_list, action_list, done_list,step,model_dir)
-                    loss_temp += ave_loss
+            for m in range(K_epoch):
+                ave_loss, v_loss, p_loss = ppo.update(data, prob_list, reward_list, action_list, done_list,step,model_dir)
+                loss_temp += ave_loss
             ave_reward = float(ave_reward) / number_of_problem / number_of_batch
             ave_ett = float(ave_ett) / number_of_problem /number_of_batch
             ave_tardy = float(ave_tardy) / number_of_problem / number_of_batch
