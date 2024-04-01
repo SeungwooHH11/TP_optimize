@@ -109,6 +109,7 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
     time = 0
     prob = 0
     num_valid_coords = 10
+    mask=np.ones((N,M,1))
     agent = np.random.randint(0, int(T/2)) #랜덤 트랜스포터 부터 지정
     node_fea[int(transporter[agent][1])][int(transporter[agent][0]) * 2] -= 1
     while unvisited_num > 0:
