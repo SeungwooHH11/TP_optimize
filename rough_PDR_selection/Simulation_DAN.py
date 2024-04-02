@@ -14,7 +14,7 @@ class Problem_sampling:
         self.Location_Number = location_number #10
         self.Transporter_type = transporter_type # 2
         self.Transporter_Number = transporter_number  # 6 3,3
-        upper_tri = np.random.uniform(dis_low, dis_high, (10, 10))
+        upper_tri = np.random.uniform(dis_low, dis_high, (location_number, location_number))
         upper_tri = np.triu(upper_tri, 1)  # 대각선 아래 제거
         symmetric_matrix = upper_tri + upper_tri.T
         np.fill_diagonal(symmetric_matrix, 0)
