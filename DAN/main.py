@@ -17,13 +17,13 @@ if __name__=="__main__":
 
     device='cuda'
     block_number=18
-    location_number=10
+    location_number=8
     transporter_type=2
     transporter_number=6
     dis_high=3000
     dis_low=500
-    ready_high=100 # 이거 낮추자,
-    tardy_high=300
+    ready_high=60 # 이거 낮추자,
+    tardy_high=180
     gap=60
     K_epoch=2
     Pr_sampler=Problem_sampling(block_number,location_number,transporter_type,transporter_number,dis_high,dis_low,ready_high,tardy_high,gap)
@@ -32,11 +32,11 @@ if __name__=="__main__":
     temp_dis[indices] = 0
     
     dis=torch.tensor(temp_dis,dtype=torch.float32).to(device)
-    ppo=PPO( learning_rate=0.0003, lmbda=0.95, gamma=1, alpha=0.5, beta=0.01, epsilon=0.2, discount_factor=1,location_num=location_number,dis=dis)
+    ppo=PPO( learning_rate=0.001, lmbda=0.95, gamma=1, alpha=0.5, beta=0.01, epsilon=0.2, discount_factor=1,location_num=location_number,dis=dis)
 
-    number_of_problem=5# 한번에 몇개의 문제를
-    number_of_batch=30 # 문제당 몇 episode씩 한번에 학습할껀지
-    number_of_trial=5000  # #이를 몇번 반복할껀지
+    number_of_problem=8# 한번에 몇개의 문제를
+    number_of_batch=50 # 문제당 몇 episode씩 한번에 학습할껀지
+    number_of_trial=2000  # #이를 몇번 반복할껀지
     number_of_iteration=10  # 전체 iteration #iteration 단위로 문제 변화
     problem = []
     Control_result=np.zeros((number_of_iteration*number_of_problem,7,6))
