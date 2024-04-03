@@ -64,12 +64,12 @@ if __name__=="__main__":
                     rs[k]=reward_sum
                     es[k]=ett_sum
                     ts[k]=tardy_sum
-                    Control_result[temp_step,nu,0]= rs.mean()
-                    Control_result[temp_step,nu,1] =rs.var()
-                    Control_result[temp_step, nu, 2] = es.mean()
-                    Control_result[temp_step, nu, 3] = es.var()
-                    Control_result[temp_step, nu, 4] = ts.mean()
-                    Control_result[temp_step, nu, 5] = ts.var()
+                Control_result[temp_step,nu,0]= rs.mean()
+                Control_result[temp_step,nu,1] =rs.var()
+                Control_result[temp_step, nu, 2] = es.mean()
+                Control_result[temp_step, nu, 3] = es.var()
+                Control_result[temp_step, nu, 4] = ts.mean()
+                Control_result[temp_step, nu, 5] = ts.var()
             temp_step+=1
         with pd.ExcelWriter(problem_dir+'problem_set'+str(i)+'.xlsx') as writer:
             dis = pd.DataFrame(problem[j][7])
