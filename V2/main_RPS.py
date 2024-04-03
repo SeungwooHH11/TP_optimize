@@ -1,5 +1,5 @@
-from Simulation_DAN import *
-from Network_DAN import *
+from Simulation_RPS import *
+from Network_RPS import *
 import torch
 import vessl
 
