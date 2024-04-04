@@ -305,7 +305,7 @@ class PPO(nn.Module):
         loss.mean().backward()
         self.optimizer.step()
 
-        for name, param in model.named_parameters():
+        for name, param in self.named_parameters():
             if param.grad is not None:
                 print(f"{name} gradient mean: {param.grad.abs().mean().item()}")
         
