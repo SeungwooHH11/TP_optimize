@@ -72,10 +72,10 @@ class CrystalGraphConvNet(nn.Module):
         self.convs2 = ConvLayer(node_fea_len, edge_fea_len)
         self.convs3 = ConvLayer(node_fea_len, edge_fea_len)
         self.final_layer = nn.Linear(node_fea_len,int(final_node_len/2)).to(device)
-        self.concat2fc = nn.Linear(final_node_len*N, ).to(device)
-        self.readout1 = nn.Linear(final_node_len*2, final_node_len*2).to(device)
-        self.readout2 = nn.Linear(final_node_len*2, final_node_len).to(device)
-        self.fc_out = nn.Linear(final_node_len, 1).to(device)
+        self.concat2fc = nn.Linear(final_node_len*N,256).to(device)
+        self.readout1 = nn.Linear(256, 128).to(device)
+        self.readout2 = nn.Linear(128, 64).to(device)
+        self.fc_out = nn.Linear(64, 1).to(device)
         self.DA_weight = nn.Parameter(torch.tensor(48/5,dtype=torch.float32))  # Learnable weight parameter
         self.DA_bias = nn.Parameter(torch.tensor(-28/5,dtype=torch.float32))
         self.DA_act=nn.Sigmoid()
@@ -111,8 +111,7 @@ class CrystalGraphConvNet(nn.Module):
         return node_final
 
     def readout(self, node_fea):
-        node_fea = self.conv_to_fc(node_fea)
-        node_fea = torch.sum(node_fea, 1)  # batch
+        node_fea = self.concat2fc(node_fea)
         node_fea = self.act_fun(node_fea)
         node_fea = self.readout1(node_fea)
         node_fea = self.act_fun(node_fea)
@@ -156,8 +155,10 @@ class PPO(nn.Module):
                  location_num,dis):
         super(PPO, self).__init__()
         self.node_fea_len = 64
-        self.gnn = CrystalGraphConvNet(orig_node_fea_len=4 + location_num, edge_fea_len=5, node_fea_len=self.node_fea_len, final_node_len=32, dis=dis)
-        self.pi = MLP(32 + 10 + 5 + 5, 1).to(device)
+        self.final_node_len=32
+        self.gnn = CrystalGraphConvNet(orig_node_fea_len=4, edge_fea_len=5, node_fea_len=self.node_fea_len, final_node_len=32, dis=dis)
+        self.pi = MLP(self.final_node_len + 10 + 5 + 5, 1).to(device)
+        self.temperature = nn.Parameter(torch.tensor(1.5,dtype=torch.float32))
         self.optimizer = optim.Adam(self.parameters(), lr=learning_rate)
         self.lmbda = lmbda
         self.gamma = gamma
@@ -170,13 +171,16 @@ class PPO(nn.Module):
         return self.gnn(node_fea, edge_fea, edge_fea_idx)
 
     def calculate_pi(self, state_gnn, node_fea, edge_fea, edge_fea_idx, distance, tp_type):
+        # state gnn 9,32
         # node_fea 9,13
         # edge_fea 9,3,5
         # edge_fea_idx 9, 3
         # distance 9,3
         # tp_type float=> 9 3 5
-        action_variable = state_gnn[edge_fea_idx, :]
-        edge_fea_tensor = edge_fea.repeat(1, 1, 2)
+
+        action_variable = state_gnn[edge_fea_idx, :] #9,3,32
+        
+        edge_fea_tensor = edge_fea.repeat(1, 1, 2) #9,3,10
 
         distance_tensor = distance.unsqueeze(2).repeat(1, 1, 5)
 
@@ -185,8 +189,8 @@ class PPO(nn.Module):
         action_variable = torch.cat([action_variable, distance_tensor], 2)
 
         action_variable = torch.cat(
-            (action_variable, torch.full((edge_fea_idx.shape[0], edge_fea_idx.shape[1], 5), tp_type).to(device)), dim=2)
-        action_probability = self.pi(action_variable)
+            (action_variable, torch.full((edge_fea_idx.shape[0], edge_fea_idx.shape[1], 5), tp_type).to(device)), dim=2) #9,3,52
+        action_probability = self.pi(action_variable) #9,3,1
         return action_probability
 
     def get_action(self, node_fea, edge_fea, edge_fea_idx, mask, distance, tp_type):
@@ -201,15 +205,12 @@ class PPO(nn.Module):
             # print(probs) # type0 weight 작다
             logits_masked = probs - 1e8 * mask
             # print(logits_masked)
-            prob = torch.softmax(logits_masked.flatten() - torch.max(logits_masked.flatten()), dim=-1)
+            prob = torch.softmax((logits_masked.flatten() - torch.max(logits_masked.flatten())/self.temperature), dim=-1)
+            
             m = Categorical(prob)
             action = m.sample().item()
             i = int(action / M)
             j = int(action % M)
-            while edge_fea_idx[i][j] < 0:
-                action = m.sample().item()
-                i = int(action / M)
-                j = int(action % M)
             return action, i, j, prob[action]
 
     def calculate_v(self, x):
@@ -250,7 +251,7 @@ class PPO(nn.Module):
                     prob_a = self.calculate_pi(state_gnn, state[0], state[1], state[2], state[3], state[4])
                     mask = state[5]
                     logits_maksed = prob_a - 1e8 * mask
-                    prob = torch.softmax(logits_maksed.flatten() - torch.max(logits_maksed.flatten()), dim=-1)
+                    prob = torch.softmax((logits_maksed.flatten() - torch.max(logits_maksed.flatten())/self.temperature), dim=-1)
                     pi_a = prob[int(action[sw])]
                     sw += 1
                     if tr == 0:
