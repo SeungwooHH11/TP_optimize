@@ -304,6 +304,11 @@ class PPO(nn.Module):
         self.optimizer.zero_grad()
         loss.mean().backward()
         self.optimizer.step()
+
+        for name, param in model.named_parameters():
+            if param.grad is not None:
+                print(f"{name} gradient mean: {param.grad.abs().mean().item()}")
+        
         if step1 % 1000 == 0:
             torch.save({
                 'model_state_dict': self.state_dict(),
