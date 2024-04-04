@@ -56,7 +56,7 @@ class ConvLayer(nn.Module):
         nbr_core = nbr_filter * mask.unsqueeze(2)
         nbr_sumed = torch.sum(nbr_filter * nbr_core, dim=1)
         
-        out = self.softplus(node_in_fea + nbr_sumed)?
+        out = self.softplus(node_in_fea + nbr_sumed)
 
         return out
 
