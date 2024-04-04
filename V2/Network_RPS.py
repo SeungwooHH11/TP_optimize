@@ -50,7 +50,7 @@ class ConvLayer(nn.Module):
 
         nbr_filter, nbr_core = total_gated_fea.chunk(2, dim=2)
         nbr_filter = self.sigmoid(nbr_filter)
-        nbr_core = self.softplus1(nbr_core)
+        nbr_core = self.softplus(nbr_core)
         mask = torch.where(edge_fea_idx < 0, torch.tensor(0), torch.tensor(1))
         nbr_filter = nbr_filter * mask.unsqueeze(2)
         nbr_core = nbr_filter * mask.unsqueeze(2)
