@@ -22,7 +22,7 @@ class ConvLayer(nn.Module):
                                  2 * self.node_fea_len).to(device)
         self.sigmoid = nn.Sigmoid()
         self.softplus = nn.Softplus()
-        
+        self.aplha = nn.Parameter(torch.tensor(0.7,dtype=torch.float32))  # Learnable weight parameter
         self.initialize_weights()
 
     
@@ -53,10 +53,10 @@ class ConvLayer(nn.Module):
         nbr_core = self.softplus(nbr_core)
         mask = torch.where(edge_fea_idx < 0, torch.tensor(0), torch.tensor(1))
         nbr_filter = nbr_filter * mask.unsqueeze(2)
-        nbr_core = nbr_filter * mask.unsqueeze(2)
+        nbr_core = nbr_filter
         nbr_sumed = torch.sum(nbr_filter * nbr_core, dim=1)
         
-        out = self.softplus(node_in_fea + nbr_sumed)
+        out = self.softplus(self.aplha*node_in_fea + nbr_sumed)
 
         return out
 
@@ -102,16 +102,16 @@ class CrystalGraphConvNet(nn.Module):
         node_fea = self.convs1(node_fea, edge_fea, edge_fea_idx)
         node_fea = self.convs2(node_fea, edge_fea, edge_fea_idx)
         node_fea = self.convs3(node_fea, edge_fea, edge_fea_idx)
+        
         node_fea=self.final_layer(node_fea)
         node_clone=node_fea.clone()
         DA_matrix=self.DA_act(self.DA_weight*self.dis+self.DA_bias)
-
         node1=torch.matmul(DA_matrix,node_clone)
         node_final=torch.cat([node_fea,node1],dim=1)
         return node_final
 
     def readout(self, node_fea):
-        node_fea = self.concat2fc(node_fea)
+        node_fea = self.concat2fc(node_fea.flatten())
         node_fea = self.act_fun(node_fea)
         node_fea = self.readout1(node_fea)
         node_fea = self.act_fun(node_fea)
@@ -317,7 +317,3 @@ class PPO(nn.Module):
             }, model_dir+'trained_model' + str(step) + '.pth')
 
         return ave_loss, v_loss, p_loss
-
-
-
-
