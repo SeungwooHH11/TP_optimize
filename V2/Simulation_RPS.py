@@ -138,7 +138,7 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
             #masking action
             valid_coords = ((edge_fea_idx >= 0) & (transporter[agent][0] >= edge_fea[:, :, 4])).nonzero()
 
-            pri=np.zeros((3,valid_coords.shape[0]))
+            pri=np.zeros((5,valid_coords.shape[0]))
             mask=np.ones((N,M,1))
             action_list=[]
             for i in range(valid_coords.shape[0]):
@@ -150,7 +150,7 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
                 pri[2][i]=-(1/edge_fea[n,e,0]*torch.exp(-(edge_fea[n,e,2])/(torch.sum(edge_fea[:,:,0])/valid_coords.shape[0]))).item()
                 pri[3][i]=edge_fea[n,e,2].item()
                 pri[4][i]=-(1/edge_fea[n,e,0]*(1-(edge_fea[n,e,2]/edge_fea[n,e,0]))).item()
-            for i in range(3):
+            for i in range(5):
                 value=np.unique(pri[i])
                 value1=value[0]
                 for j in np.where(value1==pri[i])[0]:
