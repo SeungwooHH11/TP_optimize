@@ -284,7 +284,7 @@ class PPO(nn.Module):
         td_target = rewards + self.gamma * state_next_v 
         delta = td_target - state_v
         
-        advantage_lst = torch.zeros(new_B,1)
+        advantage_lst = torch.zeros(new_B,1).to(device)
         
         
         ep_len=int(new_B/ep_num)
