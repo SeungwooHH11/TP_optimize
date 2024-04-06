@@ -1,4 +1,5 @@
 from Network_RPS import *
+
 import os
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 import torch
@@ -27,28 +28,31 @@ class Problem_sampling:
 
         Block = np.zeros((self.Block_Number, 7))
         transporter = np.zeros((self.Transporter_Number, 6))
-        for i in range(self.Block_Number):
-            v = np.random.choice(self.Location_Number, 2, False)
-            Block[i, 0], Block[i, 1] = v[0], v[1]
-            Block[i, 2] = self.Dis[int(Block[i, 0]), int(Block[i, 1])] / 80 / self.tardy_high   #processing time
-            Block[i, 3] = np.random.randint(0, self.ready_high) / self.tardy_high   # ready time
-            Block[i, 4] = np.random.randint(Block[i, 3] +self.gap,self.tardy_high ) / self.tardy_high - Block[i, 2]  # tardy time
+        max_count=10000
+        while max_count>int(self.Block_Number/self.Location_Number*2):
+            for i in range(self.Block_Number):
+                v = np.random.choice(self.Location_Number, 2, False)
+                Block[i, 0], Block[i, 1] = v[0], v[1]
+                Block[i, 2] = self.Dis[int(Block[i, 0]), int(Block[i, 1])] / 80 / self.tardy_high   #processing time
+                Block[i, 3] = np.random.randint(0, self.ready_high) / self.tardy_high   # ready time
+                Block[i, 4] = np.random.randint(Block[i, 3] +self.gap,self.tardy_high ) / self.tardy_high - Block[i, 2]  # tardy time
 
-            weight = np.random.uniform(0, 100)
-            if weight > 50:
-                Block[i, 5] = 0
-                Block[i, 6] = 1
-            else:
-                Block[i, 5] = 1
-                Block[i, 6] = 0
+                weight = np.random.uniform(0, 100)
+                if weight > 50:
+                    Block[i, 5] = 0
+                    Block[i, 6] = 1
+                else:
+                    Block[i, 5] = 1
+                    Block[i, 6] = 0
 
-        Block = Block[Block[:,0].argsort()]
-        unique_values, counts = np.unique(Block[:, 0], return_counts=True)
-        max_count = np.max(counts)
-        edge_fea_idx = -np.ones((self.Location_Number, max_count))
-        edge_fea = np.zeros((self.Location_Number, max_count, 5))
+            Block = Block[Block[:,0].argsort()]
+            unique_values, counts = np.unique(Block[:, 0], return_counts=True)
+            max_count = np.max(counts)
+
+        edge_fea_idx = -np.ones((self.Location_Number, int(self.Block_Number/self.Location_Number*2)))
+        edge_fea = np.zeros((self.Location_Number, int(self.Block_Number/self.Location_Number*2), 5))
         step = 0
-        node_in_fea = np.zeros((self.Location_Number, 4 + self.Location_Number))
+        node_in_fea = np.zeros((self.Location_Number, 4))
         step_to_ij = np.zeros((self.Location_Number, max_count))
         for i in range(len(counts)):
             for j in range(max_count):
@@ -60,7 +64,7 @@ class Problem_sampling:
 
         node_in_fea[0, 0] =  int(self.Transporter_Number / 2)
         node_in_fea[0, 2] = self.Transporter_Number-int(self.Transporter_Number / 2)
-        node_in_fea[:, 4:] = self.Dis / self.dis_high
+        
 
         for i in range(self.Transporter_Number):
             if i < int(self.Transporter_Number / 2):
@@ -96,10 +100,20 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
 
     N=edge_fea_idx.shape[0]
     M=edge_fea_idx.shape[1]
-    episode = []  # torch node_fea (9,13), edge_fea (9,3,5), edge_fea_idx(9,3), distance (9,3)
+
+    nf_list=[]
+    ef_list=[]
+    efi_list=[]
+    distance_list=[]
+    type_list=[]
+    mask_list=[]
+    
     probs = np.zeros(B)
     rewards = np.zeros(B)
-    dones = np.ones(B)
+    dones = np.ones(B+1)
+    dones[-1]=0
+    starts=np.ones(B+1)
+    starts[0]=0
     actions = np.zeros(B)
     tardiness = 0
     reward_sum = 0
@@ -112,8 +126,9 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
     mask=np.ones((N,M,1))
     agent = np.random.randint(0, int(T/2)) #랜덤 트랜스포터 부터 지정
     node_fea[int(transporter[agent][1])][int(transporter[agent][0]) * 2] -= 1
+    
     while unvisited_num > 0:
-
+        
         # transporter (T,3) TP type / heading point / TP arrival time
         start_location = transporter[agent][1]
         distance = torch.tensor(dis[int(start_location)]/120/tardy_high, dtype=torch.float32).unsqueeze(1).repeat(1,edge_fea_idx.shape[1]).to(device)  #(n, e)
@@ -150,10 +165,22 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
                         mask[n, e, 0] = 0
 
             mask=torch.tensor(mask).to(device)
-            episode.append(
-            [node_fea.clone(), edge_fea.clone(), edge_fea_idx.clone(), distance.clone(), transporter[agent][0],mask])
-
-            action, i, j, prob = ppo.get_action(node_fea, edge_fea, edge_fea_idx, mask,distance, transporter[agent][0])
+            nf1=node_fea.clone().unsqueeze(0)
+            nf1[:,:,[0,2]]=nf1[:,:,[0,2]]/T
+            ef1=edge_fea.clone().unsqueeze(0)
+            efi1=edge_fea_idx.clone().unsqueeze(0)
+            distance1=distance.clone().unsqueeze(0) # 1, N, E
+            tp1=torch.tensor(transporter[agent][0], dtype=torch.float32).unsqueeze(0)
+            mask1=mask.clone().unsqueeze(0)
+            
+            nf_list.append(nf1)
+            ef_list.append(ef1)
+            efi_list.append(efi1)
+            distance_list.append(distance1)
+            type_list.append(tp1)
+            mask_list.append(mask1)
+            
+            action, i, j, prob = ppo.get_action(nf1, ef1, efi1, mask1,distance1, tp1)
 
         elif mode == 'Random':
             valid_coords = ((edge_fea_idx >= 0) & (transporter[agent][0] >= edge_fea[:, :, 4])).nonzero()
@@ -300,11 +327,15 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
             reward_sum += reward
             actions[step] = action
             probs[step] = prob
-            dones[step] = 0
             rewards[step] = reward
-            episode.append(
-                [node_fea.clone(), edge_fea.clone(), edge_fea_idx.clone(), distance.clone(), transporter[agent][0],
-                 mask])
+            if mode=='RL':
+                nf_list.append(nf1)
+                ef_list.append(ef1)
+                efi_list.append(efi1)
+                distance_list.append(distance1)
+                type_list.append(tp1)
+                mask_list.append(mask1)
+            
             break
         sw = 0  # do while
 
@@ -351,8 +382,15 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
 
     
       # event_list 현재 시간, ett,tardy,완료시간,tp,몇번,tardy,ett,reward
+    if mode=='RL':
+        nf_list=torch.cat(nf_list,dim=0)
+        ef_list=torch.cat(ef_list,dim=0)
+        efi_list=torch.cat(efi_list,dim=0)
+        distance_list=torch.cat(distance_list,dim=0)
+        type_list=torch.cat(type_list,dim=0)
+        mask_list=torch.cat(mask_list,dim=0)
 
-    return reward_sum, tardy_sum, ett_sum, event, episode, actions, probs, rewards, dones
+    return reward_sum, tardy_sum, ett_sum, event, nf_list, ef_list, efi_list, distance_list, type_list, mask_list, actions, probs, rewards, dones, starts
 
 
 # 각각 action과 next_state로 분리하자
