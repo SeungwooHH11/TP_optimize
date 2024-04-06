@@ -35,7 +35,7 @@ if __name__=="__main__":
     ppo=PPO( learning_rate=0.001, lmbda=0.95, gamma=1, alpha=0.5, beta=0.01, epsilon=0.2, discount_factor=1,location_num=location_number,dis=dis)
 
     number_of_problem=8 # 한번에 몇개의 문제를
-    number_of_batch=50 # 문제당 몇 episode씩 한번에 학습할껀지
+    number_of_batch=80 # 문제당 몇 episode씩 한번에 학습할껀지
     number_of_trial=2000  # #이를 몇번 반복할껀지
     number_of_iteration=10  # 전체 iteration #iteration 단위로 문제 변화
     problem = []
@@ -84,32 +84,53 @@ if __name__=="__main__":
         for nu,mod in enumerate(mode_list):
             print(mod,Control_result[past_time_step:temp_step,nu,0].mean(),Control_result[past_time_step:temp_step,nu,2].mean(),Control_result[past_time_step:temp_step,nu,4].mean())
         past_time_step = temp_step
+
+        
         for k in range(number_of_trial):
             ave_reward = 0
             ave_tardy = 0
             ave_ett = 0
             loss_temp = 0
             data = [] #batch
+            nf_lists=[]
+            ef_lists=[]
+            efi_lists=[]
+            distance_lists=[]
+            type_lists=[]
+            mask_lists=[]
             action_list = np.array([])
             prob_list = np.array([])
             reward_list = np.array([])
             done_list = np.array([])
+            start_list=np.array([])
             for j in range(number_of_problem):
-                
+        
                 for l in range(number_of_batch):
-                    reward_sum, tardy_sum, ett_sum, event, episode, actions, probs, rewards, dones = simulation(
+                    reward_sum, tardy_sum, ett_sum, event, nf_list, ef_list, efi_list, distance_list, type_list, mask_list, actions, probs, rewards, dones,starts = simulation(
                         problem[j][0], problem[j][1], problem[j][2], problem[j][3], problem[j][4], problem[j][5],
                         problem[j][6], problem[j][7], problem[j][8], problem[j][9], 'RL', ppo)
                     ave_reward += reward_sum.item()
                     ave_ett += ett_sum
                     ave_tardy += tardy_sum
-                    data.append(episode)
+                    nf_lists.append(nf_list)
+                    ef_lists.append(ef_list)
+                    efi_lists.append(efi_list)
+                    distance_lists.append(distance_list)
+                    type_lists.append(type_list)
+                    mask_lists.append(mask_list)
                     action_list = np.concatenate((action_list, actions))
                     prob_list = np.concatenate((prob_list, probs))
                     reward_list = np.concatenate((reward_list, rewards))
                     done_list = np.concatenate((done_list, dones))
+                    start_list=np.concatenate((start_list,starts))
+            nf_lists=torch.cat(nf_lists,dim=0)
+            ef_lists=torch.cat(ef_lists,dim=0)
+            efi_lists=torch.cat(efi_lists,dim=0)
+            distance_lists=torch.cat(distance_lists,dim=0)
+            type_lists=torch.cat(type_lists,dim=0)
+            mask_lists=torch.cat(mask_lists,dim=0)
             for m in range(K_epoch):
-                ave_loss, v_loss, p_loss = ppo.update(data, prob_list, reward_list, action_list, done_list,step,model_dir)
+                ave_loss, v_loss, p_loss = ppo.update(nf_lists, ef_lists, efi_lists, distance_lists, type_lists, mask_lists, prob_list, reward_list,done_list, start_list, action_list, number_of_problem*number_of_batch, step,model_dir)
                 loss_temp += ave_loss
             ave_reward = float(ave_reward) / number_of_problem / number_of_batch
             ave_ett = float(ave_ett) / number_of_problem /number_of_batch
