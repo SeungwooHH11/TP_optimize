@@ -170,7 +170,7 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
             ef1=edge_fea.clone().unsqueeze(0)
             efi1=edge_fea_idx.clone().unsqueeze(0)
             distance1=distance.clone().unsqueeze(0) # 1, N, E
-            tp1=torch.tensor(transporter[agent][0], dtype=torch.float32).unsqueeze(0)
+            tp1=torch.tensor(transporter[agent][0], dtype=torch.float32).unsqueeze(0).to(device)
             mask1=mask.clone().unsqueeze(0)
             
             nf_list.append(nf1)
