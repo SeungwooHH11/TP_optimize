@@ -58,7 +58,7 @@ if __name__=="__main__":
                 es=np.zeros(20)
                 ts=np.zeros(20)
                 for k in range(20):
-                    reward_sum, tardy_sum, ett_sum, event, episode, actions, probs, rewards, dones = simulation(
+                    reward_sum, tardy_sum, ett_sum, event, nf_list, ef_list, efi_list, distance_list, type_list, mask_list, actions, probs, rewards, dones,starts = simulation(
                         problem[j][0], problem[j][1], problem[j][2], problem[j][3], problem[j][4], problem[j][5],
                         problem[j][6], problem[j][7], problem[j][8], problem[j][9], mod, ppo)
                     rs[k]=reward_sum
