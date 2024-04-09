@@ -10,7 +10,7 @@ import torch.optim as optim
 from torch.distributions import Categorical
 
 device = 'cuda'
-
+torch.manual_seed(0)
 
 class ConvLayer(nn.Module):
     def __init__(self, node_fea_len, edge_fea_len):
