@@ -33,7 +33,7 @@ if __name__=="__main__":
     temp_dis[indices] = 0
     
     dis=torch.tensor(temp_dis,dtype=torch.float32).to(device)
-    ppo=PPO( learning_rate=0.0005, lmbda=0.95, gamma=1, alpha=0.5, beta=0.01, epsilon=0.2, discount_factor=1,location_num=location_number,dis=dis)
+    ppo=PPO( learning_rate=0.001, lmbda=0.95, gamma=1, alpha=0.5, beta=0.01, epsilon=0.2, discount_factor=1,location_num=location_number,dis=dis)
 
     number_of_problem=10 # 한번에 몇개의 문제를
     number_of_batch=50 # 문제당 몇 episode씩 한번에 학습할껀지
