@@ -22,8 +22,7 @@ class ConvLayer(nn.Module):
                                  2 * self.out_fea_len).to(device)
         self.sigmoid = nn.Sigmoid()
         self.softplus1 = nn.Softplus()
-        self.bn1 = nn.BatchNorm1d(2 * self.out_fea_len).to(device)
-        self.bn2 = nn.BatchNorm1d(self.out_fea_len).to(device)
+       
         self.softplus2 = nn.Softplus()
         self.initialize_weights()
 
@@ -49,9 +48,6 @@ class ConvLayer(nn.Module):
                                   dim=2)
 
         total_gated_fea = self.fc_full(total_nbr_fea)
-
-        
-
         nbr_filter, nbr_core = total_gated_fea.chunk(2, dim=2)
         nbr_filter = self.sigmoid(nbr_filter)
         nbr_core = self.softplus1(nbr_core)
