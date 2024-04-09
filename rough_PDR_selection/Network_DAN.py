@@ -116,8 +116,8 @@ class CrystalGraphConvNet(nn.Module):
         return node_final
 
     def readout(self, node_fea):
-        
-        node_fea = self.conv_to_fc(node_fea.flatten())  # batch
+        B,N,M=node_fea.shape
+        node_fea = self.conv_to_fc(node_fea.reshape(B,-1))  # batch
         node_fea = self.act_fun(node_fea)
         node_fea = self.readout1(node_fea)
         node_fea = self.act_fun(node_fea)
