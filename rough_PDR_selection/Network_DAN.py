@@ -60,16 +60,16 @@ class ConvLayer(nn.Module):
 
 
 class CrystalGraphConvNet(nn.Module):
-    def __init__(self, orig_node_fea_len, edge_fea_len, node_fea_len,
+    def __init__(self, orig_node_fea_len, orig_edge_fea_len, edge_fea_len, node_fea_len,
                  final_node_len, dis):
         super(CrystalGraphConvNet, self).__init__()
-        semi_fea_len = int(node_fea_len)
-        self.embedding = nn.Linear(orig_node_fea_len, semi_fea_len).to(device)
+        self.embedding_n = nn.Linear(orig_node_fea_len, node_fea_len).to(device)
+        self.embedding_e = nn.Linear(orig_edge_fea_len, edge_fea_len).to(device)
         self.dis=dis
         N=dis.shape[0]
-        self.convs1 = ConvLayer(node_fea_len, edge_fea_len, node_fea_len)
-        self.convs2 = ConvLayer(node_fea_len, edge_fea_len, node_fea_len)
-        self.convs3 = ConvLayer(node_fea_len, edge_fea_len, node_fea_len)
+        self.convs1 = ConvLayer(node_fea_len, edge_fea_len)
+        self.convs2 = ConvLayer(node_fea_len, edge_fea_len)
+        self.convs3 = ConvLayer(node_fea_len, edge_fea_len)
         self.final_layer = nn.Linear(node_fea_len,int(final_node_len/2)).to(device)
         self.conv_to_fc = nn.Linear(final_node_len*N,256).to(device)
         self.readout1 = nn.Linear(256, 128).to(device)
@@ -97,7 +97,8 @@ class CrystalGraphConvNet(nn.Module):
                 nn.init.zeros_(m.bias)
         
     def forward(self, node_fea, edge_fea, edge_fea_idx):
-        node_fea = self.embedding(node_fea)  # N,fea
+        node_fea = self.embedding_n(node_fea)  # N,fea
+        edge_fea = self.embedding_e(edge_fea)
         node_fea = self.convs1(node_fea, edge_fea, edge_fea_idx)
         node_fea = self.convs2(node_fea, edge_fea, edge_fea_idx)
         node_fea = self.convs3(node_fea, edge_fea, edge_fea_idx)
