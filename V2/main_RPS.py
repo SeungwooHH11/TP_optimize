@@ -130,7 +130,7 @@ if __name__=="__main__":
             type_lists=torch.cat(type_lists,dim=0)
             mask_lists=torch.cat(mask_lists,dim=0)
             for m in range(K_epoch):
-                ave_loss, v_loss, p_loss = ppo.update(nf_lists, ef_lists, efi_lists, distance_lists, type_lists, mask_lists, prob_list, reward_list,done_list, start_list, action_list, number_of_problem*number_of_batch, step,model_dir)
+                ave_loss, v_loss, p_loss = ppo.update(nf_lists, ef_lists, efi_lists, distance_lists, type_lists, mask_lists, prob_list, reward_list,done_list, start_list, action_list, number_of_problem*number_of_batch, step+1,model_dir)
                 loss_temp += ave_loss
             ave_reward = float(ave_reward) / number_of_problem / number_of_batch
             ave_ett = float(ave_ett) / number_of_problem /number_of_batch
