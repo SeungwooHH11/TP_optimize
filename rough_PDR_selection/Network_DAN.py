@@ -50,7 +50,7 @@ class ConvLayer(nn.Module):
 
         total_gated_fea = self.fc_full(total_nbr_fea)
 
-        total_gated_fea = self.bn1(total_gated_fea.view(-1, self.out_fea_len * 2)).view(N, M, self.out_fea_len * 2)
+        
 
         nbr_filter, nbr_core = total_gated_fea.chunk(2, dim=2)
         nbr_filter = self.sigmoid(nbr_filter)
@@ -59,7 +59,7 @@ class ConvLayer(nn.Module):
         nbr_filter = nbr_filter * mask.unsqueeze(2)
         nbr_core = nbr_filter * mask.unsqueeze(2)
         nbr_sumed = torch.sum(nbr_filter * nbr_core, dim=1)
-        nbr_sumed = self.bn2(nbr_sumed)
+        
         out = self.softplus2(node_in_fea + nbr_sumed)
 
         return out
