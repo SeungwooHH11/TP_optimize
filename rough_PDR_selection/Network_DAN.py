@@ -77,7 +77,7 @@ class CrystalGraphConvNet(nn.Module):
         self.convs2 = ConvLayer(node_fea_len, edge_fea_len, node_fea_len)
         self.convs3 = ConvLayer(node_fea_len, edge_fea_len, node_fea_len)
         self.final_layer = nn.Linear(node_fea_len,int(final_node_len/2)).to(device)
-        self.conv_to_fc = nn.Linear(final_node_len*,N 256).to(device)
+        self.conv_to_fc = nn.Linear(final_node_len*N,256).to(device)
         self.readout1 = nn.Linear(256, 128).to(device)
         self.readout2 = nn.Linear(128, 64).to(device)
         self.fc_out = nn.Linear(64, 1).to(device)
