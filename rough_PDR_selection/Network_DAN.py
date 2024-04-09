@@ -72,14 +72,15 @@ class CrystalGraphConvNet(nn.Module):
         semi_fea_len = int(node_fea_len)
         self.embedding = nn.Linear(orig_node_fea_len, semi_fea_len).to(device)
         self.dis=dis
+        N=dis.shape[0]
         self.convs1 = ConvLayer(node_fea_len, edge_fea_len, node_fea_len)
         self.convs2 = ConvLayer(node_fea_len, edge_fea_len, node_fea_len)
         self.convs3 = ConvLayer(node_fea_len, edge_fea_len, node_fea_len)
         self.final_layer = nn.Linear(node_fea_len,int(final_node_len/2)).to(device)
-        self.conv_to_fc = nn.Linear(final_node_len, final_node_len*2).to(device)
-        self.readout1 = nn.Linear(final_node_len*2, final_node_len*2).to(device)
-        self.readout2 = nn.Linear(final_node_len*2, final_node_len).to(device)
-        self.fc_out = nn.Linear(final_node_len, 1).to(device)
+        self.conv_to_fc = nn.Linear(final_node_len*,N 256).to(device)
+        self.readout1 = nn.Linear(256, 128).to(device)
+        self.readout2 = nn.Linear(128, 64).to(device)
+        self.fc_out = nn.Linear(64, 1).to(device)
         self.DA_weight = nn.Parameter(torch.tensor(48/5,dtype=torch.float32))  # Learnable weight parameter
         self.DA_bias = nn.Parameter(torch.tensor(-28/5,dtype=torch.float32))
         self.DA_act=nn.Sigmoid()
@@ -115,8 +116,8 @@ class CrystalGraphConvNet(nn.Module):
         return node_final
 
     def readout(self, node_fea):
-        node_fea = self.conv_to_fc(node_fea)
-        node_fea = torch.sum(node_fea, 1)  # batch
+        
+        node_fea = self.conv_to_fc(node_fea.flatten())  # batch
         node_fea = self.act_fun(node_fea)
         node_fea = self.readout1(node_fea)
         node_fea = self.act_fun(node_fea)
