@@ -2,7 +2,8 @@ from Simulation_RPS import *
 from Network_RPS import *
 import torch
 import vessl
-
+np.random.seed(0)
+random.seed(0)
 
 if __name__=="__main__":
     problem_dir='/output/problem_set/'
@@ -32,7 +33,7 @@ if __name__=="__main__":
     temp_dis[indices] = 0
     
     dis=torch.tensor(temp_dis,dtype=torch.float32).to(device)
-    ppo=PPO( learning_rate=0.001, lmbda=0.95, gamma=1, alpha=0.5, beta=0.01, epsilon=0.2, discount_factor=1,location_num=location_number,dis=dis)
+    ppo=PPO( learning_rate=0.0005, lmbda=0.95, gamma=1, alpha=0.5, beta=0.01, epsilon=0.2, discount_factor=1,location_num=location_number,dis=dis)
 
     number_of_problem=8 # 한번에 몇개의 문제를
     number_of_batch=80 # 문제당 몇 episode씩 한번에 학습할껀지
@@ -76,10 +77,9 @@ if __name__=="__main__":
             dis.to_excel(writer, sheet_name='Sheet_Dis', index=False)
             for j in range(number_of_problem):
                 block_s=pd.DataFrame(problem[j][3])
-                tp_s=pd.DataFrame(problem[j][2])
+                
                 block_s.to_excel(writer, sheet_name='Sheet_block'+str(j), index=False)
-                tp_s.to_excel(writer, sheet_name='Sheet_transporter'+str(j), index=False)
-
+                
 
         for nu,mod in enumerate(mode_list):
             print(mod,Control_result[past_time_step:temp_step,nu,0].mean(),Control_result[past_time_step:temp_step,nu,2].mean(),Control_result[past_time_step:temp_step,nu,4].mean())
