@@ -7,7 +7,8 @@ import random
 import matplotlib.pyplot as plt
 device='cuda'
 import numpy as np
-
+np.random.seed(0)
+random.seed(0)
 
 class Problem_sampling:
     def __init__(self,block_number,location_number,transporter_type,transporter_number,dis_high,dis_low,ready_high,tardy_high,gap):
