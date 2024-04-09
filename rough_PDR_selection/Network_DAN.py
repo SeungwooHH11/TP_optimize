@@ -13,17 +13,15 @@ device = 'cuda'
 
 
 class ConvLayer(nn.Module):
-    def __init__(self, node_fea_len, edge_fea_len, out_fea_len):
+    def __init__(self, node_fea_len, edge_fea_len):
         super(ConvLayer, self).__init__()
         self.node_fea_len = node_fea_len
         self.edge_fea_len = edge_fea_len  # 여기서 fc layer 하나더 추가해도 될듯
-        self.out_fea_len = out_fea_len
         self.fc_full = nn.Linear(2 * self.node_fea_len + self.edge_fea_len,
-                                 2 * self.out_fea_len).to(device)
+                                 2 * self.node_fea_len).to(device)
         self.sigmoid = nn.Sigmoid()
-        self.softplus1 = nn.Softplus()
-       
-        self.softplus2 = nn.Softplus()
+        self.softplus = nn.Softplus()
+        self.aplha = nn.Parameter(torch.tensor(0.7,dtype=torch.float32))
         self.initialize_weights()
 
     
@@ -50,13 +48,13 @@ class ConvLayer(nn.Module):
         total_gated_fea = self.fc_full(total_nbr_fea)
         nbr_filter, nbr_core = total_gated_fea.chunk(2, dim=2)
         nbr_filter = self.sigmoid(nbr_filter)
-        nbr_core = self.softplus1(nbr_core)
+        nbr_core = self.softplus(nbr_core)
         mask = torch.where(edge_fea_idx < 0, torch.tensor(0), torch.tensor(1))
         nbr_filter = nbr_filter * mask.unsqueeze(2)
         nbr_core = nbr_filter * mask.unsqueeze(2)
         nbr_sumed = torch.sum(nbr_filter * nbr_core, dim=1)
         
-        out = self.softplus2(node_in_fea + nbr_sumed)
+        out = self.softplus(self.alpha*node_in_fea + nbr_sumed)
 
         return out
 
