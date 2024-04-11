@@ -2,7 +2,9 @@ from Simulation_DAN import *
 from Network_DAN import *
 import torch
 import vessl
-
+np.random.seed(1)
+random.seed(1)
+torch.manual_seed(1)
 
 if __name__=="__main__":
     problem_dir='/output/problem_set/'
