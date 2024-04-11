@@ -21,7 +21,7 @@ class ConvLayer(nn.Module):
                                  2 * self.node_fea_len).to(device)
         self.sigmoid = nn.Sigmoid()
         self.softplus = nn.Softplus()
-        self.aplha = nn.Parameter(torch.tensor(0.7,dtype=torch.float32))
+        self.alpha = nn.Parameter(torch.tensor(0.7,dtype=torch.float32))
         self.initialize_weights()
 
     
@@ -112,7 +112,7 @@ class CrystalGraphConvNet(nn.Module):
 
     def readout(self, node_fea):
         B,N,M=node_fea.shape
-        node_fea = self.conv_to_fc(node_fea.reshape(B,-1))  # batch
+        node_fea = self.conv_to_fc(node_fea.view(B,-1))  # batch
         node_fea = self.act_fun(node_fea)
         node_fea = self.readout1(node_fea)
         node_fea = self.act_fun(node_fea)
@@ -158,7 +158,7 @@ class PPO(nn.Module):
         self.node_fea_len = 32
         self.final_node_len=32
         self.edge_fea_len = 32
-        self.gnn = CrystalGraphConvNet(orig_node_fea_len=4, edge_fea_len=5, edge_fea_len=self.edge_fea_len, node_fea_len=self.node_fea_len, final_node_len=32, dis=dis)
+        self.gnn = CrystalGraphConvNet(orig_node_fea_len=4, orig_edge_fea_len=5, edge_fea_len=self.edge_fea_len, node_fea_len=self.node_fea_len, final_node_len=32, dis=dis)
         self.pi = MLP(32 + 10 + 5 + 5, 1).to(device)
         self.temperature = nn.Parameter(torch.tensor(1.5,dtype=torch.float32))
         self.optimizer = optim.Adam(self.parameters(), lr=learning_rate)
@@ -204,7 +204,7 @@ class PPO(nn.Module):
             # print(probs) # type0 weight 작다
             logits_masked = probs - 1e8 * mask
             # print(logits_masked)
-            prob = torch.softmax(logits_masked.flatten() - torch.max(logits_masked.flatten()), dim=-1)
+            prob = torch.softmax((logits_masked.flatten() - torch.max(logits_masked.flatten()))/self.temperature, dim=-1)
             m = Categorical(prob)
             action = m.sample().item()
             i = int(action / M)
@@ -253,7 +253,7 @@ class PPO(nn.Module):
                     prob_a = self.calculate_pi(state_gnn, state[0], state[1], state[2], state[3], state[4])
                     mask = state[5]
                     logits_maksed = prob_a - 1e8 * mask
-                    prob = torch.softmax(logits_maksed.flatten() - torch.max(logits_maksed.flatten()), dim=-1)
+                    prob = torch.softmax((logits_maksed.flatten() - torch.max(logits_maksed.flatten()))/self.temperature, dim=-1)
                     pi_a = prob[int(action[sw])]
                     sw += 1
                     if tr == 0:
