@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import os
-
+import randome
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 import torch
 import torch.nn as nn
@@ -10,6 +10,9 @@ import torch.optim as optim
 from torch.distributions import Categorical
 
 device = 'cuda'
+np.random.seed(1)
+random.seed(1)
+torch.manual_seed(1)
 
 
 class ConvLayer(nn.Module):
