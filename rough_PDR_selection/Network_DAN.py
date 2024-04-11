@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import os
-import randome
+import random
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 import torch
 import torch.nn as nn
