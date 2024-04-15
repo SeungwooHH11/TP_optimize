@@ -3,7 +3,8 @@ import numpy as np
 from Simulation_DAN import *
 from Network_DAN import *
 import torch
-#import vessl
+
+import vessl
 np.random.seed(1)
 random.seed(1)
 torch.manual_seed(1)
