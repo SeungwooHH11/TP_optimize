@@ -47,7 +47,7 @@ if __name__=="__main__":
     validation_step = 10
     Control_result=np.zeros((20,7,6))
     history = np.zeros((number_of_iteration * number_of_trial,2))
-    validation_history=np.zeros((5000/validation_step+10,6))
+    validation_history=np.zeros((int(5000/validation_step)+10,6))
     step = 0
     mode_list = ['Random', 'SPT', 'SET', 'SRT', 'ATC', 'EDD', 'COVERT']
     temp_step = 0
