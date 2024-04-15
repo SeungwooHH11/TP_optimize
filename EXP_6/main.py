@@ -148,7 +148,7 @@ if __name__=="__main__":
             history[step, 1] = loss_temp / K_epoch
             vessl.log(step=step, payload={'loss': loss_temp / K_epoch})
             step += 1
-            if step%validation_step==0:
+            if step%validation_step==1:
                 valid_reward=0
                 valid_ett=0
                 valid_tardy=0
@@ -168,8 +168,8 @@ if __name__=="__main__":
                         valid_ett += ett_sum
                         valid_tardy += tardy_sum
                         temp_best_reward=max(reward_sum.item(),temp_best_reward)
-                        temp_ett_reward = max(ett_sum.item(), temp_ett_reward)
-                        temp_tardy_reward = max(tardy_sum.item(), temp_tardy_reward)
+                        temp_ett_reward = max(ett_sum, temp_ett_reward)
+                        temp_tardy_reward = max(tardy_sum, temp_tardy_reward)
                     best_reward+=temp_best_reward
                     best_ett+=temp_ett_reward
                     best_tardy+=temp_tardy_reward
