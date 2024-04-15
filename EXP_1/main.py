@@ -148,7 +148,7 @@ if __name__=="__main__":
             history[step, 1] = loss_temp / K_epoch
             vessl.log(step=step, payload={'loss': loss_temp / K_epoch})
             step += 1
-            if step%validation_step==0:
+            if step%validation_step==1:
                 valid_reward=0
                 valid_ett=0
                 valid_tardy=0
