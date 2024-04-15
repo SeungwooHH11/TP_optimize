@@ -127,7 +127,7 @@ if __name__=="__main__":
                 for l in range(number_of_batch):
                     reward_sum, tardy_sum, ett_sum, event, episode, actions, probs, rewards, dones = simulation(
                         problem[j][0], problem[j][1], problem[j][2], problem[j][3], problem[j][4], problem[j][5],
-                        problem[j][6], problem[j][7], problem[j][8], problem[j][9], 'RL', ppo)
+                        problem[j][6], problem[j][7], problem[j][8], problem[j][9], 'RL_mask', ppo)
                     ave_reward += reward_sum.item()
                     ave_ett += ett_sum
                     ave_tardy += tardy_sum
@@ -163,7 +163,7 @@ if __name__=="__main__":
                     for l in range(number_of_validation_batch):
                         reward_sum, tardy_sum, ett_sum, event, episode, actions, probs, rewards, dones = simulation(
                             validation[j][0], validation[j][1], validation[j][2], validation[j][3], validation[j][4],
-                            validation[j][5], validation[j][6], validation[j][7], validation[j][8], validation[j][9], mod, ppo)
+                            validation[j][5], validation[j][6], validation[j][7], validation[j][8], validation[j][9], 'RL', ppo)
                         valid_reward += reward_sum.item()
                         valid_ett += ett_sum
                         valid_tardy += tardy_sum
