@@ -1,3 +1,5 @@
+import numpy as np
+
 from Simulation_DAN import *
 from Network_DAN import *
 import torch
@@ -35,57 +37,81 @@ if __name__=="__main__":
     
     dis=torch.tensor(temp_dis,dtype=torch.float32).to(device)
     ppo=PPO( learning_rate=0.001, lmbda=0.95, gamma=1, alpha=0.5, beta=0.01, epsilon=0.2, discount_factor=1,location_num=location_number,dis=dis)
-
+    number_of_validation=20
+    number_of_validation_batch=50
     number_of_problem=10 # 한번에 몇개의 문제를
     number_of_batch=80 # 문제당 몇 episode씩 한번에 학습할껀지
-    number_of_trial=2000  # #이를 몇번 반복할껀지
-    number_of_iteration=10  # 전체 iteration #iteration 단위로 문제 변화
-    problem = []
-    Control_result=np.zeros((number_of_iteration*number_of_problem,7,6))
-    history = np.zeros((number_of_iteration * number_of_trial,4))
+    number_of_trial=1000  #1, 10, 100, 1000 #이를 몇번 반복할껀지
+    number_of_iteration=int(5000/number_of_trial)  # 전체 iteration #iteration 단위로 문제 변화
+    validation=[]
+    validation_step = 10
+    Control_result=np.zeros((20,7,6))
+    history = np.zeros((number_of_iteration * number_of_trial,2))
+    validation_history=np.zeros((5000/validation_step+10,6))
     step = 0
     mode_list = ['Random', 'SPT', 'SET', 'SRT', 'ATC', 'EDD', 'COVERT']
     temp_step = 0
     past_time_step=0
-    for i in range(number_of_iteration):
 
+    for j in range(number_of_validation):
+        B, T, b, tp, efi, nf, ef, dis, step_to_ij = Pr_sampler.sample()
+        efi = efi.astype('int')
+        validation.append([B, T, tp, b, efi, nf, ef, dis, step_to_ij, tardy_high])
+
+        for nu, mod in enumerate(mode_list):
+            rs = np.zeros(20)
+            es = np.zeros(20)
+            ts = np.zeros(20)
+            for k in range(20):
+                reward_sum, tardy_sum, ett_sum, event, episode, actions, probs, rewards, dones = simulation(
+                    validation[j][0], validation[j][1], validation[j][2], validation[j][3], validation[j][4], validation[j][5],
+                    validation[j][6], validation[j][7], validation[j][8], validation[j][9], mod, ppo)
+                rs[k] = reward_sum
+                es[k] = ett_sum
+                ts[k] = tardy_sum
+            Control_result[temp_step, nu, 0] = rs.mean()
+            Control_result[temp_step, nu, 1] = rs.var()
+            Control_result[temp_step, nu, 2] = es.mean()
+            Control_result[temp_step, nu, 3] = es.var()
+            Control_result[temp_step, nu, 4] = ts.mean()
+            Control_result[temp_step, nu, 5] = ts.var()
+        temp_step += 1
+    for nu, mod in enumerate(mode_list):
+        print(mod, Control_result[past_time_step:temp_step, nu, 0].mean(),
+              Control_result[past_time_step:temp_step, nu, 2].mean(),
+              Control_result[past_time_step:temp_step, nu, 4].mean())
+
+    for i in range(number_of_iteration):
+        problem=[]
+        temp_step=0
         for j in range(number_of_problem):
             B, T, b, tp, efi, nf, ef, dis, step_to_ij = Pr_sampler.sample()
             efi = efi.astype('int')
             problem.append([B, T, tp, b, efi, nf, ef, dis, step_to_ij, tardy_high])
 
+            if number_of_trial>99:
+                for nu,mod in enumerate(mode_list):
+                    rs=np.zeros(20)
+                    es=np.zeros(20)
+                    ts=np.zeros(20)
+                    for k in range(20):
+                        reward_sum, tardy_sum, ett_sum, event, episode, actions, probs, rewards, dones = simulation(
+                            problem[j][0], problem[j][1], problem[j][2], problem[j][3], problem[j][4], problem[j][5],
+                            problem[j][6], problem[j][7], problem[j][8], problem[j][9], mod, ppo)
+                        rs[k]=reward_sum
+                        es[k]=ett_sum
+                        ts[k]=tardy_sum
+                    Control_result[temp_step,nu,0]= rs.mean()
+                    Control_result[temp_step,nu,1] =rs.var()
+                    Control_result[temp_step, nu, 2] = es.mean()
+                    Control_result[temp_step, nu, 3] = es.var()
+                    Control_result[temp_step, nu, 4] = ts.mean()
+                    Control_result[temp_step, nu, 5] = ts.var()
+                temp_step+=1
 
             for nu,mod in enumerate(mode_list):
-                rs=np.zeros(20)
-                es=np.zeros(20)
-                ts=np.zeros(20)
-                for k in range(20):
-                    reward_sum, tardy_sum, ett_sum, event, episode, actions, probs, rewards, dones = simulation(
-                        problem[j][0], problem[j][1], problem[j][2], problem[j][3], problem[j][4], problem[j][5],
-                        problem[j][6], problem[j][7], problem[j][8], problem[j][9], mod, ppo)
-                    rs[k]=reward_sum
-                    es[k]=ett_sum
-                    ts[k]=tardy_sum
-                Control_result[temp_step,nu,0]= rs.mean()
-                Control_result[temp_step,nu,1] =rs.var()
-                Control_result[temp_step, nu, 2] = es.mean()
-                Control_result[temp_step, nu, 3] = es.var()
-                Control_result[temp_step, nu, 4] = ts.mean()
-                Control_result[temp_step, nu, 5] = ts.var()
-            temp_step+=1
-        with pd.ExcelWriter(problem_dir+'problem_set'+str(i)+'.xlsx') as writer:
-            dis = pd.DataFrame(problem[j][7])
-            dis.to_excel(writer, sheet_name='Sheet_Dis', index=False)
-            for j in range(number_of_problem):
-                block_s=pd.DataFrame(problem[j][3])
-                tp_s=pd.DataFrame(problem[j][2])
-                block_s.to_excel(writer, sheet_name='Sheet_block'+str(j), index=False)
-                tp_s.to_excel(writer, sheet_name='Sheet_transporter'+str(j), index=False)
+                print(mod,Control_result[0:temp_step,nu,0].mean(),Control_result[0:temp_step,nu,2].mean(),Control_result[0:temp_step,nu,4].mean())
 
-
-        for nu,mod in enumerate(mode_list):
-            print(mod,Control_result[past_time_step:temp_step,nu,0].mean(),Control_result[past_time_step:temp_step,nu,2].mean(),Control_result[past_time_step:temp_step,nu,4].mean())
-        past_time_step = temp_step
         for k in range(number_of_trial):
             ave_reward = 0
             ave_tardy = 0
@@ -118,14 +144,56 @@ if __name__=="__main__":
             ave_tardy = float(ave_tardy) / number_of_problem / number_of_batch
             
             history[step,0]=ave_reward
-            vessl.log(step=step, payload={'average_reward': ave_reward})
-            history[step,1]=loss_temp/K_epoch
-            vessl.log(step=step, payload={'loss': loss_temp/K_epoch})
-            history[step,2]=ave_ett
-            vessl.log(step=step, payload={'average_ett': ave_ett})
-            history[step,3]=ave_tardy
-            vessl.log(step=step, payload={'average_tardy': ave_tardy})
+            vessl.log(step=step, payload={'train_average_reward': ave_reward})
+            history[step, 1] = loss_temp / K_epoch
+            vessl.log(step=step, payload={'loss': loss_temp / K_epoch})
             step += 1
+            if step%validation_step==0:
+                valid_reward=0
+                valid_ett=0
+                valid_tardy=0
+                best_reward=0
+                best_ett=0
+                best_tardy=0
+
+                for j in range(number_of_validation):
+                    temp_best_reward = -100
+                    temp_ett_reward = -100
+                    temp_tardy_reward = -100
+                    for l in range(number_of_validation_batch):
+                        reward_sum, tardy_sum, ett_sum, event, episode, actions, probs, rewards, dones = simulation(
+                            validation[j][0], validation[j][1], validation[j][2], validation[j][3], validation[j][4],
+                            validation[j][5], validation[j][6], validation[j][7], validation[j][8], validation[j][9], mod, ppo)
+                        valid_reward += reward_sum.item()
+                        valid_ett += ett_sum
+                        valid_tardy += tardy_sum
+                        temp_best_reward=max(reward_sum.item(),temp_best_reward)
+                        temp_ett_reward = max(ett_sum.item(), temp_ett_reward)
+                        temp_tardy_reward = max(tardy_sum.item(), temp_tardy_reward)
+                    best_reward+=temp_best_reward
+                    best_ett+=temp_ett_reward
+                    best_tardy+=temp_tardy_reward
+                valid_reward=valid_reward/(number_of_validation*number_of_validation_batch)
+                valid_ett = valid_ett / (number_of_validation * number_of_validation_batch)
+                valid_tardy = valid_tardy / (number_of_validation * number_of_validation_batch)
+                best_reward=best_reward/(number_of_validation)
+                best_ett = best_ett / (number_of_validation)
+                best_tardy = best_tardy / (number_of_validation)
+
+                valid_step=int(step/validation_step)
+                validation_history[valid_step, 0] = valid_reward
+                validation_history[valid_step, 1] = valid_ett
+                validation_history[valid_step, 2] = valid_tardy
+                validation_history[valid_step, 3] = best_reward
+                validation_history[valid_step, 4] = best_ett
+                validation_history[valid_step, 5] = best_tardy
+                vessl.log(step=step, payload={'average_reward':valid_reward})
+                vessl.log(step=step, payload={'best_reward': best_reward})
+                vessl.log(step=step, payload={'average_tardy': valid_tardy})
+                vessl.log(step=step, payload={'average_ett': valid_ett})
 
     history=pd.DataFrame(history)
+    validation_history=pd.DataFrame(validation_history)
     history.to_excel(history_dir+'history.xlsx', sheet_name='Sheet', index=False)
+    validation_history.to_excel(history_dir + 'valid_history.xlsx', sheet_name='Sheet', index=False)
+
