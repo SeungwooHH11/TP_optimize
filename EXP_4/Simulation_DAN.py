@@ -144,13 +144,7 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
                     n = valid_coords[j][0].item()
                     e = valid_coords[j][1].item()
                     mask[n, e, 0] = 0
-                if len(value)>1:
-                    value2 = value[1]
-                    for j in np.where(value2 == pri[i])[0]:
-                        n = valid_coords[j][0].item()
-                        e = valid_coords[j][1].item()
-                        mask[n, e, 0] = 0
-
+                
             mask=torch.tensor(mask).to(device)
             episode.append(
             [node_fea.clone(), edge_fea.clone(), edge_fea_idx.clone(), distance.clone(), transporter[agent][0],mask])
