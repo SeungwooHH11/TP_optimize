@@ -41,7 +41,7 @@ if __name__=="__main__":
     number_of_validation_batch=50
     number_of_problem=10 # 한번에 몇개의 문제를
     number_of_batch=80 # 문제당 몇 episode씩 한번에 학습할껀지
-    number_of_trial=1000  #1, 10, 100, 1000 #이를 몇번 반복할껀지
+    number_of_trial=10  #1, 10, 100, 1000 #이를 몇번 반복할껀지
     number_of_iteration=int(5000/number_of_trial)  # 전체 iteration #iteration 단위로 문제 변화
     validation=[]
     validation_step = 10
@@ -163,7 +163,7 @@ if __name__=="__main__":
                     for l in range(number_of_validation_batch):
                         reward_sum, tardy_sum, ett_sum, event, episode, actions, probs, rewards, dones = simulation(
                             validation[j][0], validation[j][1], validation[j][2], validation[j][3], validation[j][4],
-                            validation[j][5], validation[j][6], validation[j][7], validation[j][8], validation[j][9], 'RL', ppo)
+                            validation[j][5], validation[j][6], validation[j][7], validation[j][8], validation[j][9], 'RL_mask', ppo)
                         valid_reward += reward_sum.item()
                         valid_ett += ett_sum
                         valid_tardy += tardy_sum
