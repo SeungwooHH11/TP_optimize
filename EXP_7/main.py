@@ -28,7 +28,7 @@ if __name__=="__main__":
     dis_low=500
     ready_high=100 # 이거 낮추자,
     tardy_high=300
-    gap=80
+    gap=90
     K_epoch=2
     Pr_sampler=Problem_sampling(block_number,location_number,transporter_type,transporter_number,dis_high,dis_low,ready_high,tardy_high,gap)
     temp_dis=dis_low/Pr_sampler.Dis
