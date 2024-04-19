@@ -20,15 +20,15 @@ if __name__=="__main__":
         os.makedirs(history_dir)
 
     device='cuda'
-    block_number=18
-    location_number=8
+    block_number=30
+    location_number=15
     transporter_type=2
     transporter_number=6
     dis_high=3000
     dis_low=500
-    ready_high=60 # 이거 낮추자,
-    tardy_high=180
-    gap=60
+    ready_high=100 # 이거 낮추자,
+    tardy_high=300
+    gap=90
     K_epoch=2
     Pr_sampler=Problem_sampling(block_number,location_number,transporter_type,transporter_number,dis_high,dis_low,ready_high,tardy_high,gap)
     temp_dis=dis_low/Pr_sampler.Dis
@@ -41,8 +41,8 @@ if __name__=="__main__":
     number_of_validation_batch=50
     number_of_problem=10 # 한번에 몇개의 문제를
     number_of_batch=80 # 문제당 몇 episode씩 한번에 학습할껀지
-    number_of_trial=10  #1, 10, 100, 1000 #이를 몇번 반복할껀지
-    number_of_iteration=int(5000/number_of_trial)  # 전체 iteration #iteration 단위로 문제 변화
+    number_of_trial=1  #1, 10, 100, 1000 #이를 몇번 반복할껀지
+    number_of_iteration=int(1000/number_of_trial)  # 전체 iteration #iteration 단위로 문제 변화
     validation=[]
     validation_step = 10
     Control_result=np.zeros((20,7,6))
