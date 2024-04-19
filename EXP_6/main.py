@@ -20,15 +20,15 @@ if __name__=="__main__":
         os.makedirs(history_dir)
 
     device='cuda'
-    block_number=18
-    location_number=8
+    block_number=30
+    location_number=15
     transporter_type=2
     transporter_number=6
     dis_high=3000
     dis_low=500
-    ready_high=60 # 이거 낮추자,
-    tardy_high=180
-    gap=60
+    ready_high=100 # 이거 낮추자,
+    tardy_high=300
+    gap=90
     K_epoch=2
     Pr_sampler=Problem_sampling(block_number,location_number,transporter_type,transporter_number,dis_high,dis_low,ready_high,tardy_high,gap)
     temp_dis=dis_low/Pr_sampler.Dis
@@ -36,7 +36,7 @@ if __name__=="__main__":
     temp_dis[indices] = 0
     
     dis=torch.tensor(temp_dis,dtype=torch.float32).to(device)
-    ppo=PPO( learning_rate=0.001, lmbda=0.95, gamma=1, alpha=0.5, beta=0.01, epsilon=0.2, discount_factor=1,location_num=location_number,dis=dis)
+    ppo=PPO( learning_rate=0.0005, lmbda=0.95, gamma=1, alpha=0.5, beta=0.01, epsilon=0.2, discount_factor=1,location_num=location_number,dis=dis)
     number_of_validation=20
     number_of_validation_batch=50
     number_of_problem=10 # 한번에 몇개의 문제를
@@ -163,7 +163,7 @@ if __name__=="__main__":
                     for l in range(number_of_validation_batch):
                         reward_sum, tardy_sum, ett_sum, event, episode, actions, probs, rewards, dones = simulation(
                             validation[j][0], validation[j][1], validation[j][2], validation[j][3], validation[j][4],
-                            validation[j][5], validation[j][6], validation[j][7], validation[j][8], validation[j][9], 'RL', ppo)
+                            validation[j][5], validation[j][6], validation[j][7], validation[j][8], validation[j][9], 'RL_mask', ppo)
                         valid_reward += reward_sum.item()
                         valid_ett += ett_sum
                         valid_tardy += tardy_sum
