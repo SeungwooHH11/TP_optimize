@@ -132,7 +132,7 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
                  mask])
             action, i, j, prob = ppo.get_action(node_fea, edge_fea, edge_fea_idx, mask, distance, transporter[agent][0])
 
-        if mode == 'RL_RHR':
+        elif mode == 'RL_RHR':
             #masking action
             valid_coords = ((edge_fea_idx >= 0) & (transporter[agent][0] >= edge_fea[:, :, 4])).nonzero()
             pri=np.zeros((5,valid_coords.shape[0]))
@@ -167,7 +167,7 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
 
             action, i, j, prob = ppo.get_action(node_fea, edge_fea, edge_fea_idx, mask,distance, transporter[agent][0])
             
-        if mode == 'RL_HR':
+        elif mode == 'RL_HR':
             #masking action
             valid_coords = ((edge_fea_idx >= 0) & (transporter[agent][0] >= edge_fea[:, :, 4])).nonzero()
 
