@@ -105,13 +105,7 @@ class CrystalGraphConvNet(nn.Module):
         node_fea = self.convs1(node_fea, edge_fea, edge_fea_idx)
         node_fea = self.convs2(node_fea, edge_fea, edge_fea_idx)
         node_fea = self.convs3(node_fea, edge_fea, edge_fea_idx)
-        node_fea=self.final_layer(node_fea)
-        node_clone=node_fea.clone()
-        DA_matrix=self.DA_act(self.DA_weight*self.dis+self.DA_bias)
-
-        node1=torch.matmul(DA_matrix,node_clone)
-        node_final=torch.cat([node_fea,node1],dim=1)
-        return node_final
+        return node_fea
 
     def readout(self, node_fea):
         B,N,M=node_fea.shape
