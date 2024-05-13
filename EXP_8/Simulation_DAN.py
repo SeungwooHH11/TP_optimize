@@ -119,7 +119,7 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
         # transporter (T,3) TP type / heading point / TP arrival time
         start_location = transporter[agent][1]
         distance = torch.tensor(dis[int(start_location)]/120/tardy_high, dtype=torch.float32).unsqueeze(1).repeat(1,edge_fea_idx.shape[1]).to(device)  #(n, e)
-        if mode=='RL':
+        if mode=='RL_full':
             valid_coords = ((edge_fea_idx >= 0) & (transporter[agent][0] >= edge_fea[:, :, 4])).nonzero()
             mask = np.ones((N, M, 1))
             for i in range(valid_coords.shape[0]):
@@ -132,10 +132,9 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
                  mask])
             action, i, j, prob = ppo.get_action(node_fea, edge_fea, edge_fea_idx, mask, distance, transporter[agent][0])
 
-        if mode == 'RL_mask':
+        if mode == 'RL_RHR':
             #masking action
             valid_coords = ((edge_fea_idx >= 0) & (transporter[agent][0] >= edge_fea[:, :, 4])).nonzero()
-
             pri=np.zeros((5,valid_coords.shape[0]))
             mask=np.ones((N,M,1))
             action_list=[]
@@ -162,6 +161,35 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
                         e = valid_coords[j][1].item()
                         mask[n, e, 0] = 0
 
+            mask=torch.tensor(mask).to(device)
+            episode.append(
+            [node_fea.clone(), edge_fea.clone(), edge_fea_idx.clone(), distance.clone(), transporter[agent][0],mask])
+
+            action, i, j, prob = ppo.get_action(node_fea, edge_fea, edge_fea_idx, mask,distance, transporter[agent][0])
+            
+        if mode == 'RL_HR':
+            #masking action
+            valid_coords = ((edge_fea_idx >= 0) & (transporter[agent][0] >= edge_fea[:, :, 4])).nonzero()
+
+            pri=np.zeros((5,valid_coords.shape[0]))
+            mask=np.ones((N,M,1))
+            action_list=[]
+            for i in range(valid_coords.shape[0]):
+                n=valid_coords[i][0]
+                e=valid_coords[i][1]
+                pri[0][i]=max(dis[int(start_location)][n]/120/tardy_high,edge_fea[n,e,1].item())+edge_fea[n,e,0].item()
+                pri[1][i]=dis[int(start_location)][n] / 120 / tardy_high
+                #pri[2][i]=edge_fea[n,e,1].item()
+                pri[2][i]=-(1/edge_fea[n,e,0]*torch.exp(-(edge_fea[n,e,2])/(torch.sum(edge_fea[:,:,0])/valid_coords.shape[0]))).item()
+                pri[3][i]=edge_fea[n,e,2].item()
+                pri[4][i]=-(1/edge_fea[n,e,0]*(1-(edge_fea[n,e,2]/edge_fea[n,e,0]))).item()
+            for i in range(5):
+                value=np.unique(pri[i])
+                value1=value[0]
+                for j in np.where(value1==pri[i])[0]:
+                    n = valid_coords[j][0].item()
+                    e = valid_coords[j][1].item()
+                    mask[n, e, 0] = 0
             mask=torch.tensor(mask).to(device)
             episode.append(
             [node_fea.clone(), edge_fea.clone(), edge_fea_idx.clone(), distance.clone(), transporter[agent][0],mask])
