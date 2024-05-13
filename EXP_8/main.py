@@ -194,15 +194,15 @@ if __name__=="__main__":
                 validation_history[valid_step, 0] = valid_reward_HR
                 validation_history[valid_step, 1] = valid_ett_HR
                 validation_history[valid_step, 2] = valid_tardy_HR
-                validation_history[valid_step, 0] = valid_reward_RHR
-                validation_history[valid_step, 1] = valid_ett_RHR
-                validation_history[valid_step, 2] = valid_tardy_RHR
-                validation_history[valid_step, 0] = valid_reward_full
-                validation_history[valid_step, 1] = valid_ett_full
-                validation_history[valid_step, 2] = valid_tardy_full
-                validation_history[valid_step, 3] = best_reward
-                validation_history[valid_step, 4] = best_ett
-                validation_history[valid_step, 5] = best_tardy
+                validation_history[valid_step, 3] = valid_reward_RHR
+                validation_history[valid_step, 4] = valid_ett_RHR
+                validation_history[valid_step, 5] = valid_tardy_RHR
+                validation_history[valid_step, 6] = valid_reward_full
+                validation_history[valid_step, 7] = valid_ett_full
+                validation_history[valid_step, 8] = valid_tardy_full
+                validation_history[valid_step, 9] = best_reward
+                validation_history[valid_step, 10] = best_ett
+                validation_history[valid_step, 11] = best_tardy
                 vessl.log(step=step, payload={'valid_average_reward_HR':valid_reward_HR})
                 vessl.log(step=step, payload={'valid_average_reward_RHR':valid_reward_RHR})
                 vessl.log(step=step, payload={'valid_average_reward_full':valid_reward_full})
