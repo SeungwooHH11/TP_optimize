@@ -144,9 +144,9 @@ if __name__=="__main__":
                         reward_sum, tardy_sum, ett_sum, event, episode, actions, probs, rewards, dones = simulation(
                             validation[j][0], validation[j][1], validation[j][2], validation[j][3], validation[j][4],
                             validation[j][5], validation[j][6], validation[j][7], validation[j][8], validation[j][9], 'RL_RHR', ppo)
-                        valid_reward_HR += reward_sum.item()
-                        valid_ett_HR += ett_sum
-                        valid_tardy_HR += tardy_sum
+                        valid_reward_RHR += reward_sum.item()
+                        valid_ett_RHR += ett_sum
+                        valid_tardy_RHR += tardy_sum
                         
                         
                         temp_best_reward=max(reward_sum.item(),temp_best_reward)
