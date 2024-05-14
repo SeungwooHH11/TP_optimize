@@ -47,7 +47,7 @@ if __name__=="__main__":
     validation_step = 10
     Control_result=np.zeros((20,7,6))
     history = np.zeros((number_of_iteration * number_of_trial,2))
-    validation_history=np.zeros((int(1001/validation_step)+10,12))
+    validation_history=np.zeros((int(1001/validation_step)+10,6))
     step = 0
     mode_list = ['Random', 'SPT', 'SET', 'SRT', 'ATC', 'EDD', 'COVERT']
     temp_step = 0
@@ -127,15 +127,10 @@ if __name__=="__main__":
             
             step += 1
             if step%validation_step==1:
-                valid_reward_HR=0
-                valid_ett_HR=0
-                valid_tardy_HR=0
+                
                 valid_reward_RHR=0
                 valid_ett_RHR=0
                 valid_tardy_RHR=0
-                valid_reward_full=0
-                valid_ett_full=0
-                valid_tardy_full=0
                 
                 best_reward=0
                 best_ett=0
@@ -148,25 +143,11 @@ if __name__=="__main__":
                     for l in range(number_of_validation_batch):
                         reward_sum, tardy_sum, ett_sum, event, episode, actions, probs, rewards, dones = simulation(
                             validation[j][0], validation[j][1], validation[j][2], validation[j][3], validation[j][4],
-                            validation[j][5], validation[j][6], validation[j][7], validation[j][8], validation[j][9], 'RL_HR', ppo)
+                            validation[j][5], validation[j][6], validation[j][7], validation[j][8], validation[j][9], 'RL_RHR', ppo)
                         valid_reward_HR += reward_sum.item()
                         valid_ett_HR += ett_sum
                         valid_tardy_HR += tardy_sum
                         
-                        
-                        reward_sum, tardy_sum, ett_sum, event, episode, actions, probs, rewards, dones = simulation(
-                            validation[j][0], validation[j][1], validation[j][2], validation[j][3], validation[j][4],
-                            validation[j][5], validation[j][6], validation[j][7], validation[j][8], validation[j][9], 'RL_RHR', ppo)
-                        valid_reward_RHR += reward_sum.item()
-                        valid_ett_RHR += ett_sum
-                        valid_tardy_RHR += tardy_sum
-                        
-                        reward_sum, tardy_sum, ett_sum, event, episode, actions, probs, rewards, dones = simulation(
-                            validation[j][0], validation[j][1], validation[j][2], validation[j][3], validation[j][4],
-                            validation[j][5], validation[j][6], validation[j][7], validation[j][8], validation[j][9], 'RL_full', ppo)
-                        valid_reward_full += reward_sum.item()
-                        valid_ett_full += ett_sum
-                        valid_tardy_full += tardy_sum
                         
                         temp_best_reward=max(reward_sum.item(),temp_best_reward)
                         temp_ett_reward = max(ett_sum, temp_ett_reward)
@@ -174,39 +155,24 @@ if __name__=="__main__":
                     best_reward+=temp_best_reward
                     best_ett+=temp_ett_reward
                     best_tardy+=temp_tardy_reward
-                valid_reward_HR=valid_reward_HR/(number_of_validation*number_of_validation_batch)
                 valid_reward_RHR=valid_reward_RHR/(number_of_validation*number_of_validation_batch)
-                valid_reward_full=valid_reward_full/(number_of_validation*number_of_validation_batch)
-                
-                valid_ett_HR = valid_ett_HR / (number_of_validation * number_of_validation_batch)
                 valid_ett_RHR = valid_ett_RHR / (number_of_validation * number_of_validation_batch)
-                valid_ett_full = valid_ett_full / (number_of_validation * number_of_validation_batch)
-                
-                valid_tardy_HR = valid_tardy_HR / (number_of_validation * number_of_validation_batch)
                 valid_tardy_RHR = valid_tardy_RHR / (number_of_validation * number_of_validation_batch)
-                valid_tardy_full = valid_tardy_full / (number_of_validation * number_of_validation_batch)
                 
                 best_reward=best_reward/(number_of_validation)
                 best_ett = best_ett / (number_of_validation)
                 best_tardy = best_tardy / (number_of_validation)
 
                 valid_step=int(step/validation_step)
-                validation_history[valid_step, 0] = valid_reward_HR
-                validation_history[valid_step, 1] = valid_ett_HR
-                validation_history[valid_step, 2] = valid_tardy_HR
-                validation_history[valid_step, 3] = valid_reward_RHR
-                validation_history[valid_step, 4] = valid_ett_RHR
-                validation_history[valid_step, 5] = valid_tardy_RHR
-                validation_history[valid_step, 6] = valid_reward_full
-                validation_history[valid_step, 7] = valid_ett_full
-                validation_history[valid_step, 8] = valid_tardy_full
-                validation_history[valid_step, 9] = best_reward
-                validation_history[valid_step, 10] = best_ett
-                validation_history[valid_step, 11] = best_tardy
-                vessl.log(step=step, payload={'valid_average_reward_HR':valid_reward_HR})
-                vessl.log(step=step, payload={'valid_average_reward_RHR':valid_reward_RHR})
-                vessl.log(step=step, payload={'valid_average_reward_full':valid_reward_full})
-
+                validation_history[valid_step, 0] = valid_reward_RHR
+                validation_history[valid_step, 1] = valid_ett_RHR
+                validation_history[valid_step, 2] = valid_tardy_RHR
+                
+                validation_history[valid_step, 3] = best_reward
+                validation_history[valid_step, 4] = best_ett
+                validation_history[valid_step, 5] = best_tardy
+                vessl.log(step=step, payload={'average_reward':valid_reward_RHR})
+                
                 
     history=pd.DataFrame(history)
     validation_history=pd.DataFrame(validation_history)
