@@ -73,8 +73,8 @@ class CrystalGraphConvNet(nn.Module):
         self.convs1 = ConvLayer(node_fea_len, edge_fea_len)
         self.convs2 = ConvLayer(node_fea_len, edge_fea_len)
         self.convs3 = ConvLayer(node_fea_len, edge_fea_len)
-        self.final_layer = nn.Linear(node_fea_len,int(final_node_len/2)).to(device)
-        self.conv_to_fc = nn.Linear(final_node_len*N,256).to(device)
+        
+        self.conv_to_fc = nn.Linear(final_node_len*N*2,256).to(device)
         self.readout1 = nn.Linear(256, 128).to(device)
         self.readout2 = nn.Linear(128, 64).to(device)
         self.fc_out = nn.Linear(64, 1).to(device)
@@ -105,7 +105,7 @@ class CrystalGraphConvNet(nn.Module):
         node_fea = self.convs1(node_fea, edge_fea, edge_fea_idx)
         node_fea = self.convs2(node_fea, edge_fea, edge_fea_idx)
         node_fea = self.convs3(node_fea, edge_fea, edge_fea_idx)
-        node_fea=self.final_layer(node_fea)
+        
         node_clone=node_fea.clone()
         DA_matrix=self.DA_act(self.DA_weight*self.dis+self.DA_bias)
 
@@ -162,7 +162,7 @@ class PPO(nn.Module):
         self.final_node_len=32
         self.edge_fea_len = 32
         self.gnn = CrystalGraphConvNet(orig_node_fea_len=4, orig_edge_fea_len=5, edge_fea_len=self.edge_fea_len, node_fea_len=self.node_fea_len, final_node_len=32, dis=dis)
-        self.pi = MLP(32 + 10 + 5 + 5, 1).to(device)
+        self.pi = MLP(64 + 10 + 5 + 5, 1).to(device)
         self.temperature = nn.Parameter(torch.tensor(1.5,dtype=torch.float32))
         self.optimizer = optim.Adam(self.parameters(), lr=learning_rate)
         self.lmbda = lmbda
