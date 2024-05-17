@@ -119,8 +119,6 @@ def run(B, T, transporter, block, distance, iteration, We, Ww, Wd, mode, valid_s
     all_time_best = 0
     for ite in range(1, iteration + 1):
         best_z = 0
-        if ite % 10 == 0:
-            print(ite)
         for i in range(2 * B):
 
             empty_time, waiting_time, tardy_time, update = simulation(B, T, transporter, block, pheromone, False, mode)
