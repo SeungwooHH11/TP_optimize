@@ -117,8 +117,12 @@ def run(B, T, transporter, block, distance, iteration, We, Ww, Wd, mode, valid_s
     next_pheromone = pheromone.copy()
     s_time = time.time()
     all_time_best = 0
+    all_best_We=0
+    all_best_Wd=0
     for ite in range(1, iteration + 1):
         best_z = 0
+        best_We=0
+        best_Wd=0
         for i in range(2 * B):
 
             empty_time, waiting_time, tardy_time, update = simulation(B, T, transporter, block, pheromone, False, mode)
@@ -129,13 +133,17 @@ def run(B, T, transporter, block, distance, iteration, We, Ww, Wd, mode, valid_s
             if z > best_z:
                 best_z = z
                 best_update = update
+                best_We=empty_time
+                best_Wd=tardy_time
             next_pheromone = update_pheromone(next_pheromone, update, 0.05, z)
         if best_z > all_time_best:
             all_time_best = best_z
+            all_best_We=best_We
+            all_best_Wd=best_Wd
         next_pheromone = update_pheromone(next_pheromone, best_update, 0.1, best_z)
         pheromone = next_pheromone
 
-    return history, validation, compute_time, pheromone, 1 / all_time_best
+    return history, validation, compute_time, pheromone, 1 / all_time_best,all_best_We,all_best_Wd
 
 
 def update_pheromone(pheromone, update, evaporate, z):
@@ -171,13 +179,11 @@ for i in range(20):
                             [-1, -1, -1, -1,  -1, -1, -1, -1],
                             [0., 0., 0, 0, 0, 0, 0, 0]])
     block = block_case[i]
-    history, validation, compute_time, pheromone, rpd_best = run(B, T, transporter, block, distance, 1000, 1, 0, 1,
+    history, validation, compute_time, pheromone, rpd_best,all_best_We,all_best_Wd = run(B, T, transporter, block, distance, 1000, 1, 0, 1,
                                                                  'ACO_RS', 100)
-    total_validation.append(validation)
-    total_compute_time.append(np.array(compute_time).mean())
-    print(np.array(compute_time).mean())
-    print(rpd_best)
-    print('aco_rs_end')
+    
+    print(round(rpd_best,3),round(all_best_We,3),round(all_best_Wd,3))
+    print(i)
 
 total_validation = []
 total_compute_time = []
@@ -191,14 +197,11 @@ for i in range(20):
                             [-1, -1, -1, -1,  -1, -1, -1, -1],
                             [0., 0., 0, 0, 0, 0, 0, 0]])
     block = block_case[i]
-    history, validation, compute_time, pheromone, rpd_best = run(B, T, transporter, block, distance, 1000, 1, 0, 1,
+    history, validation, compute_time, pheromone, rpd_best,all_best_We,all_best_Wd = run(B, T, transporter, block, distance, 1000, 1, 0, 1,
                                                                  'ACO', 100)
-    total_validation.append(validation)
-    total_compute_time.append(np.array(compute_time).mean())
-
-    print(np.array(compute_time).mean())
-    print(rpd_best)
-    print('aco_end')
+    
+    print(round(rpd_best,3),round(all_best_We,3),round(all_best_Wd,3))
+    print(i)
 
 def select_target_for_P2(unvisited, current, distance, pheromone, block, mode):
     alpha = 1
@@ -479,4 +482,4 @@ for i in range(20):
     fitness, e, t, w = simulation_for_GA(B, T, transporter, block, distance, transporter_initial_position,
                                          population[np.argmax(fitness_list)], nojfet[np.argmax(fitness_list)],
                                          penalty=[100])
-    print(fitness, e, t, w)
+    print(round(fitness,3), round(e,3), round(t,3), round(w,3))
