@@ -195,7 +195,7 @@ for i in range(20):
                             [50., 50., 50., 50,50,100,  100, 100, 100, 100],
                             [120, 120., 120.,120,120,  120, 120, 120, 120, 120],
                             [-1, -1, -1, -1, -1,-1 -1, -1, -1, -1],
-                            [0., 0., 0, 0,0,0 0, 0, 0, 0]])
+                            [0., 0., 0, 0,0,0, 0, 0, 0, 0]])
     block = block_case[i]
     history, validation, compute_time, pheromone, rpd_best,all_best_We,all_best_Wd = run(B, T, transporter, block, distance, 1000, 1, 0, 1,
                                                                  'ACO', 100)
