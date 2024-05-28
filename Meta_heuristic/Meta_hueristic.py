@@ -150,19 +150,19 @@ def update_pheromone(pheromone, update, evaporate, z):
     pheromone = (1 - evaporate) * pheromone + update * z
     return pheromone
 
-B=100
-T=10
+B=30
+T=6
 
-distance=pd.read_excel(file_path+'validation_big.xlsx',index_col=0,sheet_name='dis')
+distance=pd.read_excel(file_path+'validation_small.xlsx',index_col=0,sheet_name='dis')
 block_case=[]
 for i in range(20):
     sname='block'+str(i)
-    case_study=np.array(pd.read_excel(file_path+'validation_big.xlsx',index_col=0,sheet_name=sname)).T
+    case_study=np.array(pd.read_excel(file_path+'validation_small.xlsx',index_col=0,sheet_name=sname)).T
     block=[]
     block.append(case_study[0])
     block.append(case_study[1])
-    block.append(case_study[3]*600)
-    block.append(case_study[4]*600)
+    block.append(case_study[3]*300)
+    block.append(case_study[4]*300)
     block.append(case_study[6]*50+25)
     block.append(case_study[6]*0)
     block=np.array(block)
@@ -171,8 +171,9 @@ for i in range(20):
 total_validation = []
 total_compute_time = []
 for i in range(20):
-    B = 100
-    T = 10
+    
+    B=30
+    T=6
     transporter = np.array([[1, 1, 1, 1,1,3,  3, 3, 3, 3],
                             [50., 50., 50., 50,50, 100 , 100, 100, 100, 100],
                             [120, 120., 120.,120,120,  120, 120, 120, 120, 120],
