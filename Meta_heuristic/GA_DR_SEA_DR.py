@@ -1,29 +1,29 @@
 import numpy as np
 import pandas as pd
 import vessl
-B = 100
-T = 10
+B = 60
+T = 8
 
 file_path='/input/'
 
-transporter = np.array([[1, 1, 1, 1, 1,3, 3, 3, 3, 3],
-                        [50., 50., 50., 50,50,100 , 100, 100, 100, 100],
-                        [120, 120., 120.,120,120,  120, 120, 120, 120, 120],
-                        [-1, -1, -1, -1, -1,-1, -1, -1, -1, -1],
-                        [0., 0., 0, 0,0,0, 0, 0, 0, 0]])
+transporter = np.array([[1, 1, 1, 1,  3, 3, 3, 3],
+                        [50., 50., 50., 50, 100, 100, 100, 100],
+                        [120, 120., 120.,  120, 120, 120, 120, 120],
+                        [-1, -1, -1, -1,  -1, -1, -1, -1],
+                        [0., 0., 0, 0,0, 0, 0, 0]])
 
 
-distance = pd.read_excel(file_path+'validation_big.xlsx', index_col=0, sheet_name='dis')
+distance = pd.read_excel(file_path+'validation_mid.xlsx', index_col=0, sheet_name='dis')
 
 block_case = []
 for i in range(20):
     sname = 'block' + str(i)
-    case_study = np.array(pd.read_excel(file_path+'validation_big.xlsx', index_col=0, sheet_name=sname)).T
+    case_study = np.array(pd.read_excel(file_path+'validation_mid.xlsx', index_col=0, sheet_name=sname)).T
     block = []
     block.append(case_study[0])
     block.append(case_study[1])
-    block.append(case_study[3] * 600)
-    block.append(case_study[4] * 600)
+    block.append(case_study[3] * 450)
+    block.append(case_study[4] * 450)
     block.append(case_study[6] * 50 + 25)
     block.append(case_study[6] * 0)
     block = np.array(block)
