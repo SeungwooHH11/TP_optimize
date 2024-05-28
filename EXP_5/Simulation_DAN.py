@@ -62,7 +62,7 @@ class Problem_sampling:
 
         node_in_fea[0, 0] =  int(self.Transporter_Number / 2)
         node_in_fea[0, 2] = self.Transporter_Number-int(self.Transporter_Number / 2)
-        node_in_fea[:,4:]=self.Dis/self.dis_high
+        
 
         for i in range(self.Transporter_Number):
             if i < int(self.Transporter_Number / 2):
