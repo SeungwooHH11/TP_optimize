@@ -368,7 +368,7 @@ for i in range(20):
     block_case.append(block)
 
 for i in range(20):
-   B = 100
+    B = 100
     T = 10
     transporter = np.array([[1, 1, 1, 1,1,3,  3, 3, 3, 3],
                             [50., 50., 50., 50,50,100 , 100, 100, 100, 100],
