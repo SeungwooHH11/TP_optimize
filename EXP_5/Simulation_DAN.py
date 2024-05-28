@@ -50,7 +50,7 @@ class Problem_sampling:
         edge_fea_idx = -np.ones((self.Location_Number, max_count))
         edge_fea = np.zeros((self.Location_Number, max_count, 5))
         step = 0
-        node_in_fea = np.zeros((self.Location_Number, 4+self.Location_Number))
+        node_in_fea = np.zeros((self.Location_Number, 4))
         step_to_ij = np.zeros((self.Location_Number, max_count))
         for i in range(len(counts)):
             for j in range(max_count):
