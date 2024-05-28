@@ -5,22 +5,13 @@ B = 100
 T = 10
 
 file_path='/input/'
-transporter = np.zeros((T, 6))
-for i in range(T):
-    if i < int(T / 2):
-        transporter[i, 0] = 0  # TP type
-        transporter[i, 1] = 0  # TP heading point
-        transporter[i, 2] = 0  # TP arrival left time
-        transporter[i, 3] = 0  # empty travel time
-        transporter[i, 4] = -1  # action i
-        transporter[i, 5] = -1  # action j
-    if i >= int(T / 2):
-        transporter[i, 0] = 1  # TP type
-        transporter[i, 1] = 0  # TP heading point
-        transporter[i, 2] = 0  # TP arrival left time
-        transporter[i, 3] = 0  # empty travel time
-        transporter[i, 4] = -1  # action i
-        transporter[i, 5] = -1  # action j
+
+transporter = np.array([[1, 1, 1, 1,1,3,  3, 3, 3, 3],
+                        [50., 50., 50., 50,50,100 , 100, 100, 100, 100],
+                        [120, 120., 120.,120,120,  120, 120, 120, 120, 120],
+                        [-1, -1, -1, -1, -1,-1 -1, -1, -1, -1],
+                        [0., 0., 0, 0,0,0 0, 0, 0, 0]])
+
 
 distance = pd.read_excel(file_path+'validation_big.xlsx', index_col=0, sheet_name='dis')
 
@@ -115,7 +106,7 @@ def generate_random_sequence():
     return sequence
 
     # 50개의 수열을 생성
-    population = np.array([generate_random_sequence() for _ in range(population_size)])
+population = np.array([generate_random_sequence() for _ in range(population_size)])
 
 
 for b_case in range(20):
@@ -177,7 +168,8 @@ for b_case in range(20):
         fitness_list[i] = 1 / fitness
 
     best_solution = population[np.argmax(fitness_list)]
-    print(round(1 / np.max(fitness_list), 3))
+    fitness, e, t =simulation_for_GA(B, T, transporter, block_case[b_case], distance, best_solution)
+    print(round(fitness, 3),round(e, 3),round(t, 3))
 
 
 
@@ -268,4 +260,6 @@ for b_case in range(20):
         fitness_list[i] = 1 / fitness
 
     best_solution = population[np.argmax(fitness_list)]
-    print(round(1 / np.max(fitness_list), 3))
+    fitness, e, t =simulation_for_GA(B, T, transporter, block_case[b_case], distance, best_solution)
+    print(round(fitness, 3),round(e, 3),round(t, 3))
+
