@@ -142,14 +142,14 @@ def update_pheromone(pheromone, update, evaporate, z):
     pheromone = (1 - evaporate) * pheromone + update * z
     return pheromone
 
-B=100
-T=10
+B=60
+T=8
 
 distance=pd.read_excel(file_path+'validation_big.xlsx',index_col=0,sheet_name='dis')
 block_case=[]
 for i in range(20):
     sname='block'+str(i)
-    case_study=np.array(pd.read_excel(file_path+'validation_big.xlsx',index_col=0,sheet_name=sname)).T
+    case_study=np.array(pd.read_excel(file_path+'validation_mid.xlsx',index_col=0,sheet_name=sname)).T
     block=[]
     block.append(case_study[0])
     block.append(case_study[1])
@@ -163,13 +163,13 @@ for i in range(20):
 total_validation = []
 total_compute_time = []
 for i in range(20):
-    B = 100
-    T = 10
-    transporter = np.array([[1, 1, 1, 1, 1, 3, 3, 3, 3, 3],
-                            [50., 50., 50., 50, 50, 100, 100, 100, 100, 100],
-                            [120, 120., 120., 120, 120, 120, 120, 120, 120, 120],
-                            [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-                            [0., 0., 0, 0, 0, 0, 0, 0, 0, 0]])
+    B = 60
+    T = 8
+    transporter = np.array([[1, 1, 1, 1,  3, 3, 3, 3],
+                            [50., 50., 50., 50,  100, 100, 100, 100],
+                            [120, 120., 120.,  120, 120, 120, 120, 120],
+                            [-1, -1, -1, -1,  -1, -1, -1, -1],
+                            [0., 0., 0, 0, 0, 0, 0, 0]])
     block = block_case[i]
     history, validation, compute_time, pheromone, rpd_best = run(B, T, transporter, block, distance, 1000, 1, 0, 1,
                                                                  'ACO_RS', 100)
@@ -183,13 +183,13 @@ total_validation = []
 total_compute_time = []
 
 for i in range(20):
-    B = 100
-    T = 10
-    transporter = np.array([[1, 1, 1, 1, 1, 3, 3, 3, 3, 3],
-                            [50., 50., 50., 50, 50, 100, 100, 100, 100, 100],
-                            [120, 120., 120., 120, 120, 120, 120, 120, 120, 120],
-                            [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-                            [0., 0., 0, 0, 0, 0, 0, 0, 0, 0]])
+    B = 60
+    T = 8
+    transporter = np.array([[1, 1, 1, 1,  3, 3, 3, 3],
+                            [50., 50., 50., 50,  100, 100, 100, 100],
+                            [120, 120., 120.,  120, 120, 120, 120, 120],
+                            [-1, -1, -1, -1,  -1, -1, -1, -1],
+                            [0., 0., 0, 0, 0, 0, 0, 0]])
     block = block_case[i]
     history, validation, compute_time, pheromone, rpd_best = run(B, T, transporter, block, distance, 1000, 1, 0, 1,
                                                                  'ACO', 100)
@@ -347,13 +347,13 @@ def assign_policy(B, T, transporter, block, distance, transporter_initial_positi
     return number_of_job_for_each_transporter, initial_solution
 
 
-B = 100
-T = 10
-distance = pd.read_excel(file_path+'validation_big.xlsx', index_col=0, sheet_name='dis')
+B = 60
+T = 8
+distance = pd.read_excel(file_path+'validation_mid.xlsx', index_col=0, sheet_name='dis')
 block_case = []
 for i in range(20):
     sname = 'block' + str(i)
-    case_study = np.array(pd.read_excel(file_path+'validation_big.xlsx', index_col=0, sheet_name=sname)).T
+    case_study = np.array(pd.read_excel(file_path+'validation_mid.xlsx', index_col=0, sheet_name=sname)).T
     block = []
     block.append(case_study[0])
     block.append(case_study[1])
@@ -365,16 +365,16 @@ for i in range(20):
     block_case.append(block)
 
 for i in range(20):
-    B = 100
-    T = 10
-    transporter = np.array([[1, 1, 1, 1, 1, 3, 3, 3, 3, 3],
-                            [50., 50., 50., 50, 50, 100, 100, 100, 100, 100],
-                            [120, 120., 120., 120, 120, 120, 120, 120, 120, 120],
-                            [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-                            [0., 0., 0, 0, 0, 0, 0, 0, 0, 0]])
+    B = 60
+    T = 8
+    transporter = np.array([[1, 1, 1, 1,  3, 3, 3, 3],
+                            [50., 50., 50., 50,  100, 100, 100, 100],
+                            [120, 120., 120.,  120, 120, 120, 120, 120],
+                            [-1, -1, -1, -1,  -1, -1, -1, -1],
+                            [0., 0., 0, 0, 0, 0, 0, 0]])
     block = block_case[i]
 
-    transporter_initial_position = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    transporter_initial_position = [0, 0, 0, 0,  0, 0, 0, 0]
 
     Q = 5000.0
     iteration = 100
