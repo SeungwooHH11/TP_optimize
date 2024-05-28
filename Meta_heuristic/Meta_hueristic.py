@@ -145,7 +145,7 @@ def update_pheromone(pheromone, update, evaporate, z):
 B=60
 T=8
 
-distance=pd.read_excel(file_path+'validation_big.xlsx',index_col=0,sheet_name='dis')
+distance=pd.read_excel(file_path+'validation_mid.xlsx',index_col=0,sheet_name='dis')
 block_case=[]
 for i in range(20):
     sname='block'+str(i)
