@@ -6,10 +6,10 @@ import time
 # Problem parameters
 np.random.seed(42)  # For reproducibility
 
-problem_name='/input/validation_big.xlsx'
+problem_name='/input/validation_busy.xlsx'
 
-B=100
-T=10
+B=60
+T=8
 
 
 def cal_t(i, k):
@@ -164,8 +164,8 @@ for i in range(20):
     block=[]
     block.append(case_study[0])
     block.append(case_study[1])
-    block.append(case_study[3]*600)
-    block.append(case_study[4]*600)
+    block.append(case_study[3]*450)
+    block.append(case_study[4]*450)
     block.append(case_study[6]*50+25)
     block.append(case_study[6]*0)
     block=np.array(block)
@@ -361,8 +361,8 @@ for i in range(20):
     block = []
     block.append(case_study[0])
     block.append(case_study[1])
-    block.append(case_study[3] * 600)
-    block.append(case_study[4] * 600)
+    block.append(case_study[3] * 450)
+    block.append(case_study[4] * 450)
     block.append(case_study[6] * 50 + 25)
     block.append(case_study[6] * 0)
     block = np.array(block)
