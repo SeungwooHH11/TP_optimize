@@ -6,7 +6,12 @@ import time
 # Problem parameters
 np.random.seed(42)  # For reproducibility
 
-file_path='/input/'
+problem_name='/input/validation_big.xlsx'
+
+B=100
+T=10
+
+
 def cal_t(i, k):
     i = int(i)
     k = int(k)
@@ -150,19 +155,17 @@ def update_pheromone(pheromone, update, evaporate, z):
     pheromone = (1 - evaporate) * pheromone + update * z
     return pheromone
 
-B=30
-T=6
 
-distance=pd.read_excel(file_path+'validation_small.xlsx',index_col=0,sheet_name='dis')
+distance=pd.read_excel(problem_name,index_col=0,sheet_name='dis')
 block_case=[]
 for i in range(20):
     sname='block'+str(i)
-    case_study=np.array(pd.read_excel(file_path+'validation_small.xlsx',index_col=0,sheet_name=sname)).T
+    case_study=np.array(pd.read_excel(problem_name,index_col=0,sheet_name=sname)).T
     block=[]
     block.append(case_study[0])
     block.append(case_study[1])
-    block.append(case_study[3]*300)
-    block.append(case_study[4]*300)
+    block.append(case_study[3]*600)
+    block.append(case_study[4]*600)
     block.append(case_study[6]*50+25)
     block.append(case_study[6]*0)
     block=np.array(block)
@@ -172,14 +175,13 @@ total_validation = []
 total_compute_time = []
 for i in range(20):
     
-    B=30
-    T=6
-    transporter = np.array([[1, 1, 1,  3, 3, 3],
-                        [50., 50., 50.,  100, 100, 100],
-                        [120, 120., 120.,   120, 120, 120],
-                        [-1, -1, -1,  -1, -1, -1],
-                        [0., 0., 0,  0, 0, 0]])
 
+    transporter = np.array([[1+2*int(x/B*2) for x in range(B)],
+                        [50+50*int(x/B*2) for x in range(B)],
+                        [120 for x in range(B)],
+                        [-1 for x in range(B)],
+                        [0 for x in range(B)]])
+    transporter=transporter.astype(np.float32)
     block = block_case[i]
     history, validation, compute_time, pheromone, rpd_best,all_best_We,all_best_Wd = run(B, T, transporter, block, distance, 1000, 1, 0, 1,
                                                                  'ACO_RS', 100)
@@ -191,14 +193,12 @@ total_validation = []
 total_compute_time = []
 
 for i in range(20):
-    B = 30
-    T = 6
-    transporter = np.array([[1, 1, 1,  3, 3, 3],
-                        [50., 50., 50.,  100, 100, 100],
-                        [120, 120., 120.,   120, 120, 120],
-                        [-1, -1, -1,  -1, -1, -1],
-                        [0., 0., 0,  0, 0, 0]])
-
+    transporter = np.array([[1+2*int(x/B*2) for x in range(B)],
+                        [50+50*int(x/B*2) for x in range(B)],
+                        [120 for x in range(B)],
+                        [-1 for x in range(B)],
+                        [0 for x in range(B)]])
+    transporter = transporter.astype(np.float32)
     block = block_case[i]
     history, validation, compute_time, pheromone, rpd_best,all_best_We,all_best_Wd = run(B, T, transporter, block, distance, 1000, 1, 0, 1,
                                                                  'ACO', 100)
@@ -353,33 +353,31 @@ def assign_policy(B, T, transporter, block, distance, transporter_initial_positi
     return number_of_job_for_each_transporter, initial_solution
 
 
-distance = pd.read_excel(file_path+'validation_small.xlsx', index_col=0, sheet_name='dis')
+distance = pd.read_excel(problem_name, index_col=0, sheet_name='dis')
 block_case = []
 for i in range(20):
     sname = 'block' + str(i)
-    case_study = np.array(pd.read_excel(file_path+'validation_small.xlsx', index_col=0, sheet_name=sname)).T
+    case_study = np.array(pd.read_excel(problem_name, index_col=0, sheet_name=sname)).T
     block = []
     block.append(case_study[0])
     block.append(case_study[1])
-    block.append(case_study[3] * 300)
-    block.append(case_study[4] * 300)
+    block.append(case_study[3] * 600)
+    block.append(case_study[4] * 600)
     block.append(case_study[6] * 50 + 25)
     block.append(case_study[6] * 0)
     block = np.array(block)
     block_case.append(block)
 
 for i in range(20):
-    B = 30
-    T = 6
-    transporter = np.array([[1, 1, 1,  3, 3, 3],
-                        [50., 50., 50.,  100, 100, 100],
-                        [120, 120., 120.,   120, 120, 120],
-                        [-1, -1, -1,  -1, -1, -1],
-                        [0., 0., 0,  0, 0, 0]])
-
+    transporter = np.array([[1 + 2 * int(x / B * 2) for x in range(B)],
+                            [50 + 50 * int(x / B * 2) for x in range(B)],
+                            [120 for x in range(B)],
+                            [-1 for x in range(B)],
+                            [0 for x in range(B)]])
+    transporter = transporter.astype(np.float32)
     block = block_case[i]
 
-    transporter_initial_position = [0, 0, 0, 0, 0, 0]
+    transporter_initial_position = [0 for x in range(B)]
 
     Q = 5000.0
     iteration = 100
