@@ -4,10 +4,10 @@ import vessl
 
 file_path='/input/'
 
-B = 60
-T = 8
+B = 100
+T = 10
 
-problem_name='validation_busy.xlsx'
+problem_name='validation_big.xlsx'
 
 transporter = np.array([[1 + 2 * int(x / B * 2) for x in range(B)],
                         [50 + 50 * int(x / B * 2) for x in range(B)],
