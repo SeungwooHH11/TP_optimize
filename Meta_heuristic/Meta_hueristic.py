@@ -10,7 +10,7 @@ problem_name='/input/validation.xlsx'
 
 B=50
 T=10
-
+'''
 
 def cal_t(i, k):
     i = int(i)
@@ -205,7 +205,7 @@ for i in range(20):
     
     print(round(rpd_best,3),round(all_best_We,3),round(all_best_Wd,3))
     print(i)
-
+'''
 def select_target_for_P2(unvisited, current, distance, pheromone, block, mode):
     alpha = 1
     beta = 1
