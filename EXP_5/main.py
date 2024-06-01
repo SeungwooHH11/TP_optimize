@@ -23,7 +23,7 @@ if __name__=="__main__":
     block_number=60
     location_number=30
     transporter_type=2
-    transporter_number=10
+    transporter_number=12
     dis_high=3000
     dis_low=500
     ready_high=100 
