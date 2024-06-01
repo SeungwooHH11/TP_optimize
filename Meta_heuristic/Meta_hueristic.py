@@ -352,6 +352,10 @@ def assign_policy(B, T, transporter, block, distance, transporter_initial_positi
         initial_solution = np.append(initial_solution, np.array(i))
     return number_of_job_for_each_transporter, initial_solution
 
+problem_name='/input/validation.xlsx'
+
+B=50
+T=10
 
 distance = pd.read_excel(problem_name, index_col=0, sheet_name='dis')
 block_case = []
@@ -377,7 +381,7 @@ for i in range(20):
     transporter = transporter.astype(np.float32)
     block = block_case[i]
 
-    transporter_initial_position = [0 for x in range(B)]
+    transporter_initial_position = [0 for x in range(T)]
 
     Q = 5000.0
     iteration = 100
