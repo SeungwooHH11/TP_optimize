@@ -81,7 +81,7 @@ if __name__=="__main__":
               Control_result[past_time_step:temp_step, nu, 2].mean(),
               Control_result[past_time_step:temp_step, nu, 4].mean())
 
-    for i in range(number_of_iteration):
+    for i in range(int(number_of_iteration/2)):
         problem=[]
         temp_step=0
         for j in range(number_of_problem):
