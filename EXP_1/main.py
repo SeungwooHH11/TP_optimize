@@ -42,12 +42,12 @@ if __name__=="__main__":
     number_of_problem=5 # 한번에 몇개의 문제를
     number_of_batch=50 # 문제당 몇 episode씩 한번에 학습할껀지
     number_of_trial=1  #1, 10, 100, 1000 #이를 몇번 반복할껀지
-    number_of_iteration=int(1001/number_of_trial)  # 전체 iteration #iteration 단위로 문제 변화
+    number_of_iteration=int(2001/number_of_trial)  # 전체 iteration #iteration 단위로 문제 변화
     validation=[]
     validation_step = 10
     Control_result=np.zeros((20,7,6))
     history = np.zeros((number_of_iteration * number_of_trial,2))
-    validation_history=np.zeros((int(1001/validation_step)+10,12))
+    validation_history=np.zeros((int(2001/validation_step)+10,12))
     step = 0
     mode_list = ['Random', 'SPT', 'SET', 'SRT', 'ATC', 'EDD', 'COVERT']
     temp_step = 0
@@ -106,7 +106,7 @@ if __name__=="__main__":
                 for l in range(number_of_batch):
                     reward_sum, tardy_sum, ett_sum, event, episode, actions, probs, rewards, dones = simulation(
                         problem[j][0], problem[j][1], problem[j][2], problem[j][3], problem[j][4], problem[j][5],
-                        problem[j][6], problem[j][7], problem[j][8], problem[j][9], 'RL_HR', ppo)
+                        problem[j][6], problem[j][7], problem[j][8], problem[j][9], 'RL_full', ppo)
                     ave_reward += reward_sum.item()
                     ave_ett += ett_sum
                     ave_tardy += tardy_sum
