@@ -13,7 +13,7 @@ device = 'cuda'
 np.random.seed(1)
 random.seed(1)
 torch.manual_seed(1)
-
+torch.cuda.seed(0)
 
 class ConvLayer(nn.Module):
     def __init__(self, node_fea_len, edge_fea_len):
