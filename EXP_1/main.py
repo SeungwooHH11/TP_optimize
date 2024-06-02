@@ -7,6 +7,7 @@ import vessl
 np.random.seed(1)
 random.seed(1)
 torch.manual_seed(1)
+torch.cuda.seed(0)
 
 if __name__=="__main__":
     problem_dir='/output/problem_set/'
