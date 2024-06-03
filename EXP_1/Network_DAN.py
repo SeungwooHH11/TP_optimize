@@ -12,7 +12,13 @@ from torch.distributions import Categorical
 device = 'cuda'
 np.random.seed(1)
 random.seed(1)
-torch.cuda.manual_seed(1)
+torch.manual_seed(1)
+if torch.cuda.is_available():
+    torch.cuda.manual_seed(1)
+    torch.cuda.manual_seed_all(1)  # if you are using multi-GPU.
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False
+
 class ConvLayer(nn.Module):
     def __init__(self, node_fea_len, edge_fea_len):
         super(ConvLayer, self).__init__()
