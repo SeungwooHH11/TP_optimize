@@ -47,7 +47,7 @@ if __name__=="__main__":
     number_of_problem=5 # 한번에 몇개의 문제를
     number_of_batch=50 # 문제당 몇 episode씩 한번에 학습할껀지
     number_of_trial=1  #1, 10, 100, 1000 #이를 몇번 반복할껀지
-    number_of_iteration=int(1001/number_of_trial)  # 전체 iteration #iteration 단위로 문제 변화
+    number_of_iteration=int(600/number_of_trial)  # 전체 iteration #iteration 단위로 문제 변화
     validation=[]
     validation_step = 10
     Control_result=np.zeros((20,7,6))
@@ -86,7 +86,7 @@ if __name__=="__main__":
               Control_result[past_time_step:temp_step, nu, 2].mean(),
               Control_result[past_time_step:temp_step, nu, 4].mean())
 
-    for i in range(int(number_of_iteration/2)):
+    for i in range(int(number_of_iteration)):
         problem=[]
         temp_step=0
         for j in range(number_of_problem):
