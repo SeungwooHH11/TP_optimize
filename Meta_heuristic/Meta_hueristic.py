@@ -11,7 +11,7 @@ problem_name='/input/validation_big.xlsx'
 B=120
 T=12
 
-
+'''
 def cal_t(i, k):
     i = int(i)
     k = int(k)
@@ -206,7 +206,7 @@ for i in range(20):
     print(round(rpd_best,3),round(all_best_We,3),round(all_best_Wd,3))
     print(i)
 
-
+'''
 def select_target_for_P2(unvisited, current, distance, pheromone, block, mode):
     alpha = 1
     beta = 1
@@ -353,10 +353,10 @@ def assign_policy(B, T, transporter, block, distance, transporter_initial_positi
         initial_solution = np.append(initial_solution, np.array(i))
     return number_of_job_for_each_transporter, initial_solution
 
-problem_name='/input/validation_busy.xlsx'
+problem_name='/input/validation.xlsx'
 
-B=120
-T=12
+B=50
+T=10
 
 distance = pd.read_excel(problem_name, index_col=0, sheet_name='dis')
 block_case = []
@@ -366,8 +366,8 @@ for i in range(20):
     block = []
     block.append(case_study[0])
     block.append(case_study[1])
-    block.append(case_study[3] * 600)
-    block.append(case_study[4] * 600)
+    block.append(case_study[3] * 300)
+    block.append(case_study[4] * 300)
     block.append(case_study[6] * 50 + 25)
     block.append(case_study[6] * 0)
     block = np.array(block)
@@ -397,7 +397,7 @@ for i in range(20):
     population_size = 50
     chromosome_length = B
     mutation_rate = 0.01
-    generations = 10000
+    generations = 100000
 
     # 초기 인구 생성
     population = np.zeros((population_size, chromosome_length))
