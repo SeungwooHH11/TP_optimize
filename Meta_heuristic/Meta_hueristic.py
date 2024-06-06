@@ -6,12 +6,24 @@ import time
 # Problem parameters
 np.random.seed(42)  # For reproducibility
 
-problem_name='/input/validation_big.xlsx'
+problem_name='validation.xlsx'
+if problem_name=='validation_big.xlsx':
+    B = 100
+    T = 10
+    B_T=10
+elif problem_name=='validation_budy.xlsx':
+    B=60
+    T=8
+    B_T = 7.5
+elif problem_name=='validation_small.xlsx':
+    B=30
+    T=6
+    B_T = 5
+else:
+    B=50
+    T=10
+    B_T = 5
 
-B=120
-T=12
-
-'''
 def cal_t(i, k):
     i = int(i)
     k = int(k)
@@ -75,6 +87,7 @@ def select_target(unvisited, block, transporter, agent, valid, mode, pheromone):
 
 
 def simulation(B, T, transporter, block, pheromone, valid, mode):
+    starting_time=time.time()
     unvisited_set = np.array(range(B))
     empty_time = 0
     waiting_time = 0
@@ -109,14 +122,15 @@ def simulation(B, T, transporter, block, pheromone, valid, mode):
         transporter[3][int(agent)] = select
         tardy_time += max(0, transporter[4][int(agent)] - block[3][int(select)])
         unvisited_set = np.delete(unvisited_set, np.where(unvisited_set == select)[0])
-
-    return empty_time, waiting_time, tardy_time, update
+    finish_time=time.time()
+    simulation_time=finish_time-starting_time
+    return empty_time, waiting_time, tardy_time, update, simulation_time
 
 
 def run(B, T, transporter, block, distance, iteration, We, Ww, Wd, mode, valid_step):
     history = []
     validation = []
-    compute_time = []
+
 
     pheromone = np.ones((B, B)) / B
     next_pheromone = pheromone.copy()
@@ -124,14 +138,19 @@ def run(B, T, transporter, block, distance, iteration, We, Ww, Wd, mode, valid_s
     all_time_best = 0
     all_best_We=0
     all_best_Wd=0
+    simulation_times=np.zeros(iteration*2*B)
     for ite in range(1, iteration + 1):
         best_z = 0
         best_We=0
         best_Wd=0
-        for i in range(2 * B):
+        step=0
 
-            empty_time, waiting_time, tardy_time, update = simulation(B, T, transporter, block, pheromone, False, mode)
+        for i in range(B):
 
+            empty_time, waiting_time, tardy_time, update,simulation_time = simulation(B, T, transporter, block, pheromone, False, mode)
+            simulation_times[step]=simulation_time
+
+            step+=1
             history.append(We * empty_time + Ww * waiting_time + Wd * tardy_time)
 
             z = 1 / (We * empty_time + Ww * waiting_time + Wd * tardy_time)
@@ -147,8 +166,9 @@ def run(B, T, transporter, block, distance, iteration, We, Ww, Wd, mode, valid_s
             all_best_Wd=best_Wd
         next_pheromone = update_pheromone(next_pheromone, best_update, 0.1, best_z)
         pheromone = next_pheromone
-
-    return history, validation, compute_time, pheromone, 1 / all_time_best,all_best_We,all_best_Wd
+    f_time=time.time()
+    compute_time=f_time-s_time
+    return history, validation, compute_time, pheromone, 1 / all_time_best,all_best_We,all_best_Wd, simulation_times
 
 
 def update_pheromone(pheromone, update, evaporate, z):
@@ -156,16 +176,16 @@ def update_pheromone(pheromone, update, evaporate, z):
     return pheromone
 
 
-distance=pd.read_excel(problem_name,index_col=0,sheet_name='dis')
+distance=pd.read_excel('/input/'+problem_name,index_col=0,sheet_name='dis')
 block_case=[]
 for i in range(20):
     sname='block'+str(i)
-    case_study=np.array(pd.read_excel(problem_name,index_col=0,sheet_name=sname)).T
+    case_study=np.array(pd.read_excel('/input/'+problem_name,index_col=0,sheet_name=sname)).T
     block=[]
     block.append(case_study[0])
     block.append(case_study[1])
-    block.append(case_study[3]*600)
-    block.append(case_study[4]*600)
+    block.append(case_study[3]*int(B_T*60))
+    block.append(case_study[4]*int(B_T*60))
     block.append(case_study[6]*50+25)
     block.append(case_study[6]*0)
     block=np.array(block)
@@ -173,19 +193,22 @@ for i in range(20):
 
 total_validation = []
 total_compute_time = []
+
 for i in range(20):
     
 
-    transporter = np.array([[1+2*int(x/B*2) for x in range(B)],
-                        [50+50*int(x/B*2) for x in range(B)],
-                        [120 for x in range(B)],
-                        [-1 for x in range(B)],
-                        [0 for x in range(B)]])
+    transporter = np.array([[1+2*int(x/T*2) for x in range(T)],
+                        [50+50*int(x/T*2) for x in range(T)],
+                        [120 for x in range(T)],
+                        [-1 for x in range(T)],
+                        [0 for x in range(T)]])
     transporter=transporter.astype(np.float32)
     block = block_case[i]
-    history, validation, compute_time, pheromone, rpd_best,all_best_We,all_best_Wd = run(B, T, transporter, block, distance, 1000, 1, 0, 1,
+    history, validation, compute_time, pheromone, rpd_best,all_best_We,all_best_Wd, simulation_times = run(B, T, transporter, block, distance, 1000, 1, 0, 1,
                                                                  'ACO_RS', 100)
-    
+    print(compute_time)
+    print(simulation_times.sum())
+    print(simulation_times.mean())
     print(round(rpd_best,3),round(all_best_We,3),round(all_best_Wd,3))
     print(i)
 
@@ -193,20 +216,21 @@ total_validation = []
 total_compute_time = []
 
 for i in range(20):
-    transporter = np.array([[1+2*int(x/B*2) for x in range(B)],
-                        [50+50*int(x/B*2) for x in range(B)],
-                        [120 for x in range(B)],
-                        [-1 for x in range(B)],
-                        [0 for x in range(B)]])
+    transporter = np.array([[1 + 2 * int(x / T * 2) for x in range(T)],
+                            [50 + 50 * int(x / T * 2) for x in range(T)],
+                            [120 for x in range(T)],
+                            [-1 for x in range(T)],
+                            [0 for x in range(T)]])
     transporter = transporter.astype(np.float32)
     block = block_case[i]
-    history, validation, compute_time, pheromone, rpd_best,all_best_We,all_best_Wd = run(B, T, transporter, block, distance, 1000, 1, 0, 1,
+    history, validation, compute_time, pheromone, rpd_best,all_best_We,all_best_Wd, simulation_times = run(B, T, transporter, block, distance, 1000, 1, 0, 1,
                                                                  'ACO', 100)
-    
+    print(compute_time)
+    print(simulation_times.sum())
+    print(simulation_times.mean())
     print(round(rpd_best,3),round(all_best_We,3),round(all_best_Wd,3))
     print(i)
 
-'''
 def select_target_for_P2(unvisited, current, distance, pheromone, block, mode):
     alpha = 1
     beta = 1
@@ -236,6 +260,7 @@ def select_target_for_P2(unvisited, current, distance, pheromone, block, mode):
 
 
 def ACO_for_P2(iteration, Q, distance, B, block):
+
     pheromone = np.ones((B, B)) / B
     next_pheromone = pheromone.copy()
 
@@ -353,32 +378,30 @@ def assign_policy(B, T, transporter, block, distance, transporter_initial_positi
         initial_solution = np.append(initial_solution, np.array(i))
     return number_of_job_for_each_transporter, initial_solution
 
-problem_name='/input/validation.xlsx'
 
-B=50
-T=10
 
-distance = pd.read_excel(problem_name, index_col=0, sheet_name='dis')
+distance = pd.read_excel('/input/'+problem_name, index_col=0, sheet_name='dis')
 block_case = []
 for i in range(20):
     sname = 'block' + str(i)
-    case_study = np.array(pd.read_excel(problem_name, index_col=0, sheet_name=sname)).T
+    case_study = np.array(pd.read_excel('/input/'+problem_name, index_col=0, sheet_name=sname)).T
     block = []
     block.append(case_study[0])
     block.append(case_study[1])
-    block.append(case_study[3] * 300)
-    block.append(case_study[4] * 300)
+    block.append(case_study[3] *int(B_T*60))
+    block.append(case_study[4] *int(B_T*60))
     block.append(case_study[6] * 50 + 25)
     block.append(case_study[6] * 0)
     block = np.array(block)
     block_case.append(block)
 
 for i in range(20):
-    transporter = np.array([[1 + 2 * int(x / B * 2) for x in range(B)],
-                            [50 + 50 * int(x / B * 2) for x in range(B)],
-                            [120 for x in range(B)],
-                            [-1 for x in range(B)],
-                            [0 for x in range(B)]])
+    s_t=time.time()
+    transporter = np.array([[1 + 2 * int(x / T * 2) for x in range(T)],
+                            [50 + 50 * int(x / T * 2) for x in range(T)],
+                            [120 for x in range(T)],
+                            [-1 for x in range(T)],
+                            [0 for x in range(T)]])
     transporter = transporter.astype(np.float32)
     block = block_case[i]
 
@@ -394,10 +417,10 @@ for i in range(20):
     # fitness = simulation_for_GA(B,T,transporter,block,distance,transporter_initial_position,sequence,nojfet,penalty=[20])
 
     # 초기화
-    population_size = 50
+    population_size = 200
     chromosome_length = B
     mutation_rate = 0.01
-    generations = 100000
+    generations = 50000
 
     # 초기 인구 생성
     population = np.zeros((population_size, chromosome_length))
@@ -487,4 +510,6 @@ for i in range(20):
     fitness, e, t, w = simulation_for_GA(B, T, transporter, block, distance, transporter_initial_position,
                                          population[np.argmax(fitness_list)], nojfet[np.argmax(fitness_list)],
                                          penalty=[100])
+    f_t=time.time()
+    print(f_t-s_t)
     print(round(fitness,3), round(e,3), round(t,3), round(w,3))
