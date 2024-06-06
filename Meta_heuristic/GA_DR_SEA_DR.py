@@ -51,7 +51,7 @@ chromosome_length = B
 P_R = 0.5
 P_C = 0.8
 P_M = 0.2
-generations = 1000
+generations = 5000
 
 
 def cal_t(i, k):
