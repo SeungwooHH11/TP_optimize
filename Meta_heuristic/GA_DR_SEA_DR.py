@@ -123,11 +123,11 @@ def generate_random_sequence():
     return sequence
 
     # 50개의 수열을 생성
-population = np.array([generate_random_sequence() for _ in range(population_size)])
 
 
 for b_case in range(20):
     s_t=time.time()
+    population = np.array([generate_random_sequence() for _ in range(population_size)])
     for generation in range(generations):
         # 적합도 평가
         
