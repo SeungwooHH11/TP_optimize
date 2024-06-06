@@ -206,12 +206,9 @@ for i in range(20):
     block = block_case[i]
     history, validation, compute_time, pheromone, rpd_best,all_best_We,all_best_Wd, simulation_times = run(B, T, transporter, block, distance, 1000, 1, 0, 1,
                                                                  'ACO_RS', 100)
-    print(compute_time)
-    print(simulation_times.sum())
-    print(simulation_times.mean())
-    print(round(rpd_best,3),round(all_best_We,3),round(all_best_Wd,3))
-    print(i)
-
+    print(round(rpd_best,3),round(all_best_We,3),round(all_best_Wd,3),round(compute_time,3))
+    
+print('ACO_RS end')
 total_validation = []
 total_compute_time = []
 
@@ -225,12 +222,9 @@ for i in range(20):
     block = block_case[i]
     history, validation, compute_time, pheromone, rpd_best,all_best_We,all_best_Wd, simulation_times = run(B, T, transporter, block, distance, 1000, 1, 0, 1,
                                                                  'ACO', 100)
-    print(compute_time)
-    print(simulation_times.sum())
-    print(simulation_times.mean())
-    print(round(rpd_best,3),round(all_best_We,3),round(all_best_Wd,3))
-    print(i)
-
+     print(round(rpd_best,3),round(all_best_We,3),round(all_best_Wd,3),round(compute_time,3))
+    
+print('ACO end')
 def select_target_for_P2(unvisited, current, distance, pheromone, block, mode):
     alpha = 1
     beta = 1
@@ -417,10 +411,10 @@ for i in range(20):
     # fitness = simulation_for_GA(B,T,transporter,block,distance,transporter_initial_position,sequence,nojfet,penalty=[20])
 
     # 초기화
-    population_size = 200
+    population_size = 100
     chromosome_length = B
     mutation_rate = 0.01
-    generations = 50000
+    generations = 10000
 
     # 초기 인구 생성
     population = np.zeros((population_size, chromosome_length))
@@ -511,5 +505,4 @@ for i in range(20):
                                          population[np.argmax(fitness_list)], nojfet[np.argmax(fitness_list)],
                                          penalty=[100])
     f_t=time.time()
-    print(f_t-s_t)
-    print(round(fitness,3), round(e,3), round(t,3), round(w,3))
+    print(round(fitness,3), round(e,3), round(t,3), round(w,3),round(f_t-s_T,3))
