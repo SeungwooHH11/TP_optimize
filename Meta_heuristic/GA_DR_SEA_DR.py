@@ -4,7 +4,7 @@ import vessl
 
 file_path='/input/'
 
-problem_name='validation_busy.xlsx'
+problem_name='validation.xlsx'
 if problem_name=='validation_big.xlsx':
     B = 100
     T = 10
@@ -39,8 +39,8 @@ for i in range(20):
     block = []
     block.append(case_study[0])
     block.append(case_study[1])
-    block.append(case_study[3] * 600)
-    block.append(case_study[4] * 600)
+    block.append(case_study[3] * int(60*B_T))
+    block.append(case_study[4] * int(60*B_T))
     block.append(case_study[6] * 50 + 25)
     block.append(case_study[6] * 0)
     block = np.array(block)
