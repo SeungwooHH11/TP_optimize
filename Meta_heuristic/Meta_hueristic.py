@@ -500,7 +500,7 @@ for i in range(20):
         fitness_list[i] = 1 / fitness
 
     best_solution = population[np.argmax(fitness_list)]
-    print(1 / np.max(fitness_list))
+    
     fitness, e, t, w = simulation_for_GA(B, T, transporter, block, distance, transporter_initial_position,
                                          population[np.argmax(fitness_list)], nojfet[np.argmax(fitness_list)],
                                          penalty=[100])
