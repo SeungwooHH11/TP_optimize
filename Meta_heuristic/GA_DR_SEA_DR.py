@@ -4,16 +4,30 @@ import vessl
 
 file_path='/input/'
 
-B = 120
-T = 12
+problem_name='validation_busy.xlsx'
+if problem_name=='validation_big.xlsx':
+    B = 100
+    T = 10
+    B_T=10
+elif problem_name=='validation_busy.xlsx':
+    B=60
+    T=8
+    B_T = 7.5
+elif problem_name=='validation_small.xlsx':
+    B=30
+    T=6
+    B_T = 5
+else:
+    B=50
+    T=10
+    B_T = 5
 
-problem_name='validation_big.xlsx'
 
-transporter = np.array([[1 + 2 * int(x / B * 2) for x in range(B)],
-                        [50 + 50 * int(x / B * 2) for x in range(B)],
-                        [120 for x in range(B)],
-                        [-1 for x in range(B)],
-                        [0 for x in range(B)]])
+transporter = np.array([[1 + 2 * int(x / T * 2) for x in range(T)],
+                        [50 + 50 * int(x / T * 2) for x in range(T)],
+                        [120 for x in range(T)],
+                        [-1 for x in range(T)],
+                        [0 for x in range(T)]])
 transporter=transporter.astype(np.float32)
 
 distance = pd.read_excel(file_path+problem_name, index_col=0, sheet_name='dis')
@@ -113,8 +127,10 @@ population = np.array([generate_random_sequence() for _ in range(population_size
 
 
 for b_case in range(20):
+    s_t=time.time()
     for generation in range(generations):
         # 적합도 평가
+        
         fitness_list = np.zeros(population_size)
         for i in range(population_size):
             fitness, e, t = simulation_for_GA(B, T, transporter, block_case[b_case], distance, population[i])
@@ -169,10 +185,11 @@ for b_case in range(20):
     for i in range(population_size):
         fitness, e, t = simulation_for_GA(B, T, transporter, block_case[b_case], distance, population[i])
         fitness_list[i] = 1 / fitness
-
+    f_t=time.time()
+    
     best_solution = population[np.argmax(fitness_list)]
     fitness, e, t =simulation_for_GA(B, T, transporter, block_case[b_case], distance, best_solution)
-    print(round(fitness, 3),round(e, 3),round(t, 3))
+    print(round(fitness, 3),round(e, 3),round(t, 3),round(f_t-s_t,3))
 
 
 
