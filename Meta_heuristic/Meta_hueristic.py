@@ -222,7 +222,7 @@ for i in range(20):
     block = block_case[i]
     history, validation, compute_time, pheromone, rpd_best,all_best_We,all_best_Wd, simulation_times = run(B, T, transporter, block, distance, 1000, 1, 0, 1,
                                                                  'ACO', 100)
-     print(round(rpd_best,3),round(all_best_We,3),round(all_best_Wd,3),round(compute_time,3))
+    print(round(rpd_best,3),round(all_best_We,3),round(all_best_Wd,3),round(compute_time,3))
     
 print('ACO end')
 def select_target_for_P2(unvisited, current, distance, pheromone, block, mode):
