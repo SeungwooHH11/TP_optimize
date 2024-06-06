@@ -136,10 +136,8 @@ for b_case in range(20):
             fitness, e, t = simulation_for_GA(B, T, transporter, block_case[b_case], distance, population[i])
             fitness_list[i] = 1 / fitness
 
-        sorted_indices = np.argsort(fitness_list)[::-1]
-
-        # 상위 60개의 인덱스 추출
-        top_indices = sorted_indices[:2 * B]
+        
+        top_indices = np.where(fitness_list > np.mean(fitness_list))[0]
 
         # 상위 60개의 인덱스에서 30개를 복원 추출로 선택
         selected_indices = np.random.choice(top_indices, int(2 * B * P_R), replace=True)
