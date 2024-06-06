@@ -6,12 +6,12 @@ import time
 # Problem parameters
 np.random.seed(42)  # For reproducibility
 
-problem_name='validation.xlsx'
+problem_name='validation_busy.xlsx'
 if problem_name=='validation_big.xlsx':
     B = 100
     T = 10
     B_T=10
-elif problem_name=='validation_budy.xlsx':
+elif problem_name=='validation_busy.xlsx':
     B=60
     T=8
     B_T = 7.5
