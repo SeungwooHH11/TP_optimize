@@ -6,7 +6,7 @@ import time
 # Problem parameters
 np.random.seed(42)  # For reproducibility
 
-problem_name='validation.xlsx'
+problem_name='validation_busy.xlsx'
 if problem_name=='validation_big.xlsx':
     B = 100
     T = 10
@@ -23,6 +23,9 @@ else:
     B=50
     T=10
     B_T = 5
+print(B)
+print(T)
+print(B_T)
 '''
 def cal_t(i, k):
     i = int(i)
