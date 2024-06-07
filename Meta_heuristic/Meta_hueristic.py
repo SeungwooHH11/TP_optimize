@@ -6,7 +6,7 @@ import time
 # Problem parameters
 np.random.seed(42)  # For reproducibility
 
-problem_name='validation_big.xlsx'
+problem_name='validation.xlsx'
 if problem_name=='validation_big.xlsx':
     B = 100
     T = 10
