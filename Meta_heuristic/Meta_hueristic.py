@@ -23,7 +23,7 @@ else:
     B=50
     T=10
     B_T = 5
-
+'''
 def cal_t(i, k):
     i = int(i)
     k = int(k)
@@ -225,6 +225,7 @@ for i in range(20):
     print(round(rpd_best,3),round(all_best_We,3),round(all_best_Wd,3),round(compute_time,3))
     
 print('ACO end')
+'''
 def select_target_for_P2(unvisited, current, distance, pheromone, block, mode):
     alpha = 1
     beta = 1
@@ -505,4 +506,4 @@ for i in range(20):
                                          population[np.argmax(fitness_list)], nojfet[np.argmax(fitness_list)],
                                          penalty=[100])
     f_t=time.time()
-    print(round(fitness,3), round(e,3), round(t,3), round(w,3),round(f_t-s_T,3))
+    print(round(fitness,3), round(e,3), round(t,3), round(w,3),round(f_t-s_t,3))
