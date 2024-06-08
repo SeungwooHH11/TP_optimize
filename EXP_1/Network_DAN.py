@@ -307,7 +307,7 @@ class PPO(nn.Module):
         self.optimizer.zero_grad()
         loss.mean().backward()
         self.optimizer.step()
-        if step1 % 10 == 0:
+        if step1 % 20 == 0:
             torch.save({
                 'model_state_dict': self.state_dict(),
                 'optimizer_state_dict': self.optimizer.state_dict(),
