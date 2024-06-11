@@ -40,7 +40,7 @@ if __name__=="__main__":
     number_of_validation=20
     number_of_validation_batch=50
     number_of_problem=5 # 한번에 몇개의 문제를
-    number_of_batch=50 # 문제당 몇 episode씩 한번에 학습할껀지
+    number_of_batch=30 # 문제당 몇 episode씩 한번에 학습할껀지
     number_of_trial=1  #1, 10, 100, 1000 #이를 몇번 반복할껀지
     number_of_iteration=int(1001/number_of_trial)  # 전체 iteration #iteration 단위로 문제 변화
     validation=[]
