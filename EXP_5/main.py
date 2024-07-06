@@ -20,10 +20,10 @@ if __name__=="__main__":
         os.makedirs(history_dir)
 
     device='cuda'
-    block_number=30
-    location_number=15
+    block_number=50
+    location_number=25
     transporter_type=2
-    transporter_number=6
+    transporter_number=10
     dis_high=3000
     dis_low=500
     ready_high=100 
@@ -106,7 +106,7 @@ if __name__=="__main__":
                 for l in range(number_of_batch):
                     reward_sum, tardy_sum, ett_sum, event, episode, actions, probs, rewards, dones = simulation(
                         problem[j][0], problem[j][1], problem[j][2], problem[j][3], problem[j][4], problem[j][5],
-                        problem[j][6], problem[j][7], problem[j][8], problem[j][9], 'RL_HR', ppo)
+                        problem[j][6], problem[j][7], problem[j][8], problem[j][9], 'RL_full', ppo)
                     ave_reward += reward_sum.item()
                     ave_ett += ett_sum
                     ave_tardy += tardy_sum
