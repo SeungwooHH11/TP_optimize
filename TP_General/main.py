@@ -126,7 +126,7 @@ if __name__=="__main__":
             vessl.log(step=step, payload={'train_average_reward': ave_reward})
             
             step += 1
-            if step%validation_step==1:
+            if step%validation_step==1 and step>500:
                 valid_reward_HR=0
                 valid_ett_HR=0
                 valid_tardy_HR=0
