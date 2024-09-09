@@ -106,7 +106,7 @@ if __name__=="__main__":
                 for l in range(number_of_batch):
                     reward_sum, tardy_sum, ett_sum, event, episode, actions, probs, rewards, dones = simulation(
                         problem[j][0], problem[j][1], problem[j][2], problem[j][3], problem[j][4], problem[j][5],
-                        problem[j][6], problem[j][7], problem[j][8], problem[j][9], 'RL_HR', ppo)
+                        problem[j][6], problem[j][7], problem[j][8], problem[j][9], 'RL_full', ppo)
                     ave_reward += reward_sum.item()
                     ave_ett += ett_sum
                     ave_tardy += tardy_sum
@@ -146,20 +146,7 @@ if __name__=="__main__":
                     temp_ett_reward = -100
                     temp_tardy_reward = -100
                     for l in range(number_of_validation_batch):
-                        reward_sum, tardy_sum, ett_sum, event, episode, actions, probs, rewards, dones = simulation(
-                            validation[j][0], validation[j][1], validation[j][2], validation[j][3], validation[j][4],
-                            validation[j][5], validation[j][6], validation[j][7], validation[j][8], validation[j][9], 'RL_HR', ppo)
-                        valid_reward_HR += reward_sum.item()
-                        valid_ett_HR += ett_sum
-                        valid_tardy_HR += tardy_sum
                         
-                        
-                        reward_sum, tardy_sum, ett_sum, event, episode, actions, probs, rewards, dones = simulation(
-                            validation[j][0], validation[j][1], validation[j][2], validation[j][3], validation[j][4],
-                            validation[j][5], validation[j][6], validation[j][7], validation[j][8], validation[j][9], 'RL_RHR', ppo)
-                        valid_reward_RHR += reward_sum.item()
-                        valid_ett_RHR += ett_sum
-                        valid_tardy_RHR += tardy_sum
                         
                         reward_sum, tardy_sum, ett_sum, event, episode, actions, probs, rewards, dones = simulation(
                             validation[j][0], validation[j][1], validation[j][2], validation[j][3], validation[j][4],
@@ -203,8 +190,7 @@ if __name__=="__main__":
                 validation_history[valid_step, 9] = best_reward
                 validation_history[valid_step, 10] = best_ett
                 validation_history[valid_step, 11] = best_tardy
-                vessl.log(step=step, payload={'valid_average_reward_HR':valid_reward_HR})
-                vessl.log(step=step, payload={'valid_average_reward_RHR':valid_reward_RHR})
+                
                 vessl.log(step=step, payload={'valid_average_reward_full':valid_reward_full})
 
                 
