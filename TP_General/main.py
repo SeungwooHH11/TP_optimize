@@ -22,7 +22,7 @@ if __name__=="__main__":
     device='cuda'
     block_number=60
     location_number=30
-    transporter_type=4
+    transporter_type=3
     transporter_number=12
     dis_high=3000
     dis_low=500
