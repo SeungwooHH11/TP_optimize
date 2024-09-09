@@ -198,7 +198,7 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
             i = valid_coords[action][0].item()
             j = valid_coords[action][1].item()
 
-        elif mode=='SPT': #PDR
+        elif mode=='SSPT': #PDR
             valid_coords = ((edge_fea_idx >= 0) & ( 1== edge_fea[:, :, 3+int(transporter[agent][0])])).nonzero()
             pt=np.zeros(valid_coords.shape[0])
             for i in range(valid_coords.shape[0]):
@@ -259,28 +259,38 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
             i = valid_coords[action][0].item()
             j = valid_coords[action][1].item()
 
-        elif mode=='ATC':
+        elif mode=='ATCS':
             valid_coords = ((edge_fea_idx >= 0) & ( 1== edge_fea[:, :, 3+int(transporter[agent][0])])).nonzero()
+            pt_average = np.zeros(valid_coords.shape[0])
+            st_average = np.zeros(valid_coords.shape[0])
             pt = np.zeros(valid_coords.shape[0])
             for i in range(valid_coords.shape[0]):
                 n = valid_coords[i][0]
                 e = valid_coords[i][1]
-                pt[i] = -(1/edge_fea[n,e,0]*torch.exp(-(edge_fea[n,e,2])/(torch.sum(edge_fea[:,:,0])/valid_coords.shape[0]))).item()
-            min_index = np.argmin(pt)  # 가장 작은 값의 인덱스 찾기
+                pt_average[i]=edge_fea[n,e,0]
+                st_average[i]=dis[int(start_location)][n] / 120 / tardy_high
+            pt_a=pt_average.mean()
+            st_a=st_average.mean()
+
+            for i in range(valid_coords.shape[0]):
+                n = valid_coords[i][0]
+                e = valid_coords[i][1]
+                st=dis[int(start_location)][n] / 120 / tardy_high
+                pt[i] = (1/edge_fea[n,e,0]*math.exp(-max(edge_fea[n,e,2],0)/pt_a)*math.exp(-st/st_a)).item()
+            max_index = np.argmax(pt)  # 가장 작은 값의 인덱스 찾기
 
             # 같은 값이 여러 개인 경우 처리
-            min_value = pt[min_index]
-            same_value_indices = np.where(pt == min_value)[0]
+            max_value = pt[max_index]
+            same_value_indices = np.where(pt == max_value)[0]
 
             # 같은 값이 하나 이상인 경우
             if len(same_value_indices) > 1:
-                min_index = np.random.choice(same_value_indices)
-            action = min_index
+                max_index = np.random.choice(same_value_indices)
+            action = max_index
             i = valid_coords[action][0].item()
             j = valid_coords[action][1].item()
 
-
-        elif mode=='EDD':
+        elif mode=='MDD':
             valid_coords = ((edge_fea_idx >= 0) & ( 1== edge_fea[:, :, 3+int(transporter[agent][0])])).nonzero()
             pt = np.zeros(valid_coords.shape[0])
             for i in range(valid_coords.shape[0]):
