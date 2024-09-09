@@ -42,7 +42,7 @@ class Problem_sampling:
             test[temp_type]+=1
             Block[i,5:]=1
             Block[i,5:5+temp_type]-=1
-        print(test)
+        #print(test)
         Block = Block[Block[:,0].argsort()]
         unique_values, counts = np.unique(Block[:, 0], return_counts=True)
         max_count = np.max(counts)
