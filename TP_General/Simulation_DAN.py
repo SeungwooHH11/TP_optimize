@@ -9,7 +9,7 @@ import numpy as np
 np.random.seed(1)
 random.seed(1)
 torch.manual_seed(1)
-
+import math
 class Problem_sampling:
     def __init__(self,block_number,location_number,transporter_type,transporter_number,dis_high,dis_low,ready_high,tardy_high,gap):
         self.Block_Number = block_number #30
