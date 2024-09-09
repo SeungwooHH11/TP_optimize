@@ -186,7 +186,7 @@ class PPO(nn.Module):
         action_variable = torch.cat([action_variable, distance_tensor], 2)
 
         action_variable = torch.cat(
-            (action_variable, torch.full((edge_fea_idx.shape[0], edge_fea_idx.shape[1], 5), tp_type).to(device)), dim=2)
+            (action_variable, torch.full((edge_fea_idx.shape[0], edge_fea_idx.shape[1], 5), float(tp_type)/self.transporter_type).to(device)), dim=2)
         action_probability = self.pi(action_variable)
         return action_probability
 
