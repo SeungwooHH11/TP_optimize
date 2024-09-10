@@ -188,7 +188,7 @@ class PPO(nn.Module):
         
         # 현재 타입의 위치에 1을 할당
         one_hot_vector[int(tp_type)] = 1
-        reshaped_tensor = one_hot_tensor.expand(edge_fea_idx.shape[0], edge_fea_idx.shape[1], self.transporter_type)
+        reshaped_tensor = one_hot_vector.expand(edge_fea_idx.shape[0], edge_fea_idx.shape[1], self.transporter_type)
         action_variable = torch.cat([action_variable, reshaped_tensor], 2)
         action_probability = self.pi(action_variable)
         return action_probability
