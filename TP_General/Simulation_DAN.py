@@ -455,10 +455,14 @@ def next_state(transporter, edge_fea_idx, node_fea, edge_fea,  tardiness, min_ti
 def select_agent(transporter):
     event=transporter[:,2]
     min_time=event.min()
-    #argmin = np.where( (min_time == transporter[:,2]) & (transporter[:,0]==0))[0]
-    argmin = np.where((min_time == transporter[:, 2]) )[0]
+    argmin = np.where( (min_time == transporter[:,2]) & (transporter[:,0]==0))[0]
+    i=0
+    while len(argmin)==0:
+        i+=1
+        argmin = np.where( (min_time == transporter[:,2]) & (transporter[:,0]==i))[0]
     agent = int(random.choice(argmin))
     return agent, min_time
+    
 
 
 def plot_gantt_chart(events, B, T):
