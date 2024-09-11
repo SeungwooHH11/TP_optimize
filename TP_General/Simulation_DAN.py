@@ -367,7 +367,7 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
             temp_tardy += tardy
             time += mintime
             
-            valid_coords = ((edge_fea_idx >= 0) & ( 1== edge_fea[:, :, 3+int(transporter[agent][0])])).nonzero()
+            valid_coords = ((edge_fea_idx >= 0) & ( 0== edge_fea[:, :, 3+int(transporter[agent][0])])).nonzero()
             num_valid_coords = valid_coords.shape[0]
             if num_valid_coords == 0:
                 transporter[agent][2] = float("inf")
