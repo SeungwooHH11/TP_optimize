@@ -112,7 +112,7 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
         start_location = transporter[agent][1]
         distance = torch.tensor(dis[int(start_location)]/120/tardy_high, dtype=torch.float32).unsqueeze(1).repeat(1,edge_fea_idx.shape[1]).to(device)  #(n, e)
         if mode=='RL_full': #tp type=2
-            valid_coords = ((edge_fea_idx >= 0) & ( 1== edge_fea[:, :, 3+int(transporter[agent][0])])).nonzero()
+            valid_coords = ((edge_fea_idx >= 0) & ( 0== edge_fea[:, :, 3+int(transporter[agent][0])])).nonzero()
             # edge_fea      0                 1       2           3,4,5,6
             #          processing_time, ready_time, tardy_time, weight one hot encoding(self.Transporter_type) 3+self.Transporter_type
             mask = np.ones((N, M, 1))
@@ -128,7 +128,7 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
 
         elif mode == 'RL_RHR':
             #masking action
-            valid_coords = ((edge_fea_idx >= 0) & ( 1== edge_fea[:, :, 3+int(transporter[agent][0])])).nonzero()
+            valid_coords = ((edge_fea_idx >= 0) & ( 0== edge_fea[:, :, 3+int(transporter[agent][0])])).nonzero()
             pri=np.zeros((6,valid_coords.shape[0]))
             mask=np.ones((N,M,1))
             action_list=[]
@@ -163,7 +163,7 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
             
         elif mode == 'RL_HR':
             #masking action
-            valid_coords = ((edge_fea_idx >= 0) & ( 1== edge_fea[:, :, 3+int(transporter[agent][0])])).nonzero()
+            valid_coords = ((edge_fea_idx >= 0) & ( 0== edge_fea[:, :, 3+int(transporter[agent][0])])).nonzero()
 
             pri=np.zeros((6,valid_coords.shape[0]))
             mask=np.ones((N,M,1))
@@ -191,14 +191,14 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
             action, i, j, prob = ppo.get_action(node_fea, edge_fea, edge_fea_idx, mask,distance, transporter[agent][0])
 
         elif mode == 'Random':
-            valid_coords = ((edge_fea_idx >= 0) & ( 1== edge_fea[:, :, 3+int(transporter[agent][0])])).nonzero()
+            valid_coords = ((edge_fea_idx >= 0) & (0== edge_fea[:, :, 3+int(transporter[agent][0])])).nonzero()
             num_valid_coords = valid_coords.shape[0]
             action = random.randint(0, num_valid_coords - 1)
             i = valid_coords[action][0].item()
             j = valid_coords[action][1].item()
 
         elif mode=='SSPT': #PDR
-            valid_coords = ((edge_fea_idx >= 0) & ( 1== edge_fea[:, :, 3+int(transporter[agent][0])])).nonzero()
+            valid_coords = ((edge_fea_idx >= 0) & ( 0== edge_fea[:, :, 3+int(transporter[agent][0])])).nonzero()
             pt=np.zeros(valid_coords.shape[0])
             for i in range(valid_coords.shape[0]):
                 n=valid_coords[i][0]
@@ -219,7 +219,7 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
 
         elif mode=='SET':
 
-            valid_coords = ((edge_fea_idx >= 0) & ( 1== edge_fea[:, :, 3+int(transporter[agent][0])])).nonzero()
+            valid_coords = ((edge_fea_idx >= 0) & ( 0== edge_fea[:, :, 3+int(transporter[agent][0])])).nonzero()
             pt = np.zeros(valid_coords.shape[0])
             for i in range(valid_coords.shape[0]):
                 n = valid_coords[i][0]
@@ -239,7 +239,7 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
             j = valid_coords[action][1].item()
 
         elif mode == 'SRT':
-            valid_coords = ((edge_fea_idx >= 0) & ( 1== edge_fea[:, :, 3+int(transporter[agent][0])])).nonzero()
+            valid_coords = ((edge_fea_idx >= 0) & ( 0== edge_fea[:, :, 3+int(transporter[agent][0])])).nonzero()
             pt = np.zeros(valid_coords.shape[0])
             for i in range(valid_coords.shape[0]):
                 n = valid_coords[i][0]
@@ -259,7 +259,7 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
             j = valid_coords[action][1].item()
 
         elif mode=='ATCS':
-            valid_coords = ((edge_fea_idx >= 0) & ( 1== edge_fea[:, :, 3+int(transporter[agent][0])])).nonzero()
+            valid_coords = ((edge_fea_idx >= 0) & ( 0== edge_fea[:, :, 3+int(transporter[agent][0])])).nonzero()
             pt_average = np.zeros(valid_coords.shape[0])
             st_average = np.zeros(valid_coords.shape[0])
             pt = np.zeros(valid_coords.shape[0])
@@ -290,7 +290,7 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
             j = valid_coords[action][1].item()
 
         elif mode=='MDD':
-            valid_coords = ((edge_fea_idx >= 0) & ( 1== edge_fea[:, :, 3+int(transporter[agent][0])])).nonzero()
+            valid_coords = ((edge_fea_idx >= 0) & ( 0== edge_fea[:, :, 3+int(transporter[agent][0])])).nonzero()
             pt = np.zeros(valid_coords.shape[0])
             for i in range(valid_coords.shape[0]):
                 n = valid_coords[i][0]
@@ -310,7 +310,7 @@ def simulation(B, T, transporter, block, edge_fea_idx, node_fea, edge_fea, dis, 
             j = valid_coords[action][1].item()
 
         elif mode=='COVERT':
-            valid_coords = ((edge_fea_idx >= 0) & ( 1== edge_fea[:, :, 3+int(transporter[agent][0])])).nonzero()
+            valid_coords = ((edge_fea_idx >= 0) & ( 0== edge_fea[:, :, 3+int(transporter[agent][0])])).nonzero()
             pt = np.zeros(valid_coords.shape[0])
             for i in range(valid_coords.shape[0]):
                 n = valid_coords[i][0]
