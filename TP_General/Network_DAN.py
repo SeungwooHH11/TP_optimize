@@ -157,7 +157,7 @@ class PPO(nn.Module):
         self.final_node_len=32
         self.edge_fea_len = 32
         self.gnn = CrystalGraphConvNet(orig_node_fea_len=int(2*self.transporter_type), orig_edge_fea_len=int(3+self.transporter_type), edge_fea_len=self.edge_fea_len, node_fea_len=self.node_fea_len, final_node_len=32, dis=dis)
-        self.pi = MLP(32 + 2*int(3+self.transporter_type) + self.transporter_type + 5, 1).to(device)
+        self.pi = MLP(32 + 2*int(3+self.transporter_type) + 5 + 5, 1).to(device)
         self.temperature = 1.0
         self.optimizer = optim.Adam(self.parameters(), lr=learning_rate)
         self.lmbda = lmbda
@@ -184,12 +184,15 @@ class PPO(nn.Module):
         action_variable = torch.cat([action_variable, edge_fea_tensor], 2)
 
         action_variable = torch.cat([action_variable, distance_tensor], 2)
-        one_hot_vector = torch.zeros(self.transporter_type).to(device)
+        action_variable = torch.cat(
+            (action_variable, torch.full((edge_fea_idx.shape[0], edge_fea_idx.shape[1], 5), float(tp_type)/self.transporter_type).to(device)), dim=2)
+        
+        '''one_hot_vector = torch.zeros(self.transporter_type).to(device)
         
         # 현재 타입의 위치에 1을 할당
         one_hot_vector[int(tp_type)] = 1
         reshaped_tensor = one_hot_vector.expand(edge_fea_idx.shape[0], edge_fea_idx.shape[1], self.transporter_type)
-        action_variable = torch.cat([action_variable, reshaped_tensor], 2)
+        action_variable = torch.cat([action_variable, reshaped_tensor], 2)'''
         action_probability = self.pi(action_variable)
         return action_probability
 
