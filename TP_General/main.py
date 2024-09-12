@@ -20,10 +20,10 @@ if __name__=="__main__":
         os.makedirs(history_dir)
 
     device='cuda'
-    block_number=40
+    block_number=45
     location_number=20
-    transporter_type=4
-    transporter_number=8
+    transporter_type=3
+    transporter_number=9
     dis_high=3000
     dis_low=500
     ready_high=100 
