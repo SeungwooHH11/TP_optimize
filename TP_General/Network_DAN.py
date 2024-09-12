@@ -158,7 +158,7 @@ class PPO(nn.Module):
         self.edge_fea_len = 32
         self.gnn = CrystalGraphConvNet(orig_node_fea_len=int(2*self.transporter_type), orig_edge_fea_len=int(3+self.transporter_type), edge_fea_len=self.edge_fea_len, node_fea_len=self.node_fea_len, final_node_len=32, dis=dis)
         self.pi = MLP(32 + 2*int(3+self.transporter_type) + self.transporter_type + 5, 1).to(device)
-        self.temperature = 1.5
+        self.temperature = 1.0
         self.optimizer = optim.Adam(self.parameters(), lr=learning_rate)
         self.lmbda = lmbda
         self.gamma = gamma
