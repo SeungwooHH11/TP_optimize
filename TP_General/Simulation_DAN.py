@@ -37,8 +37,9 @@ class Problem_sampling:
             Block[i, 3] = np.random.randint(0, self.ready_high) / self.tardy_high   # ready time
             Block[i, 4] = np.random.randint(Block[i, 3] +self.gap,self.tardy_high ) / self.tardy_high - Block[i, 2]  # tardy time
 
-            weight = np.random.uniform(0, 50*self.Transporter_type)
-            temp_type=int(weight/50)
+            #weight = np.random.uniform(0, 50*self.Transporter_type)
+            #temp_type=int(weight/50)
+            temp_type=int(i/self.Block_Number*self.Transporter_type)
             ##개수 고정하고 학습해보자
             test[temp_type]+=1
             Block[i,5:5+temp_type]+=1
@@ -61,14 +62,11 @@ class Problem_sampling:
                     step += 1
 
         for i in range(self.Transporter_type):
-            #node_in_fea[0, i*2] =  int(self.Transporter_Number / self.Transporter_type)
-            if i==0:
-                node_in_fea[0, i*2] = 2.0
-            else:
-                node_in_fea[0, i*2] = 3.0
+            node_in_fea[0, i*2] =  int(self.Transporter_Number / self.Transporter_type)
+            
 
         for i in range(self.Transporter_Number):
-            transporter[i, 0] = int((i*self.Transporter_type+2)/self.Transporter_Number)  # TP type
+            transporter[i, 0] = int((i*self.Transporter_type)/self.Transporter_Number)  # TP type
             transporter[i, 1] = 0  # TP heading point
             transporter[i, 2] = 0  # TP arrival left time
             transporter[i, 3] = 0  # empty travel time
