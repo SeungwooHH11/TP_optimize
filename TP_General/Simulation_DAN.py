@@ -39,7 +39,7 @@ class Problem_sampling:
 
             #weight = np.random.uniform(0, 50*self.Transporter_type)
             #temp_type=int(weight/50)
-            temp_type=int(i/self.Block_Number*self.Transporter_type)
+            temp_type=int(float(i)/self.Block_Number*self.Transporter_type)
             ##개수 고정하고 학습해보자
             test[temp_type]+=1
             Block[i,5:5+temp_type]+=1
