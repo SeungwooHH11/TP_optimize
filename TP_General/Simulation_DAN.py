@@ -37,9 +37,9 @@ class Problem_sampling:
             Block[i, 3] = np.random.randint(0, self.ready_high) / self.tardy_high   # ready time
             Block[i, 4] = np.random.randint(Block[i, 3] +self.gap,self.tardy_high ) / self.tardy_high - Block[i, 2]  # tardy time
 
-            #weight = np.random.uniform(0, 50*self.Transporter_type)
-            #temp_type=int(weight/50)
-            temp_type=int(float(i)/self.Block_Number*self.Transporter_type)
+            weight = np.random.uniform(0, 50*self.Transporter_type)
+            temp_type=int(weight/50)
+            #temp_type=int(float(i)/self.Block_Number*self.Transporter_type)
             ##개수 고정하고 학습해보자
             test[temp_type]+=1
             Block[i,5:5+temp_type]+=1
