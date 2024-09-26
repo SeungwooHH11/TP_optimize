@@ -6,7 +6,7 @@ import time
 # Problem parameters
 np.random.seed(42)  # For reproducibility
 
-problem_name='B1.xlsx'
+problem_name='A2.xlsx'
 
 
 info=pd.read_excel('/input/'+problem_name,sheet_name='info')
