@@ -27,7 +27,7 @@ if __name__=="__main__":
     dis_high=8000
     dis_low=500
     ready_high=200
-    tardy_high=600
+    tardy_high=400
     gap=200
     K_epoch=2
     dis=pd.read_excel('/input/'+"distance_modified.xlsx",index_col=0)
