@@ -30,7 +30,7 @@ if __name__=="__main__":
     tardy_high=600
     gap=200
     K_epoch=2
-    dis=pd.read_excel('/input/'+"distance_modified.xlsx",index_col=0)
+    dis=np.array(pd.read_excel('/input/'+"distance_modified.xlsx",index_col=0))
 
     Pr_sampler=Problem_sampling(block_number,location_number,transporter_type,dis,transporter_number,ready_high,tardy_high,gap,dis_high)
     temp_dis=dis_low/Pr_sampler.Dis
