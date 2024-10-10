@@ -31,7 +31,7 @@ class Problem_sampling:
             v = np.random.choice(self.Location_Number, 2, False)
             Block[i, 0], Block[i, 1] = v[0], v[1]
             Block[i, 2] = self.Dis[int(Block[i, 0]), int(Block[i, 1])] / 80 / self.tardy_high   #processing time
-            Block[i, 3] = 0
+            Block[i, 3] = np.random.randint(0, self.ready_high) / self.tardy_high   # ready time
             Block[i, 4] = 1
 
             weight = np.random.uniform(0, 50*self.Transporter_type)
