@@ -27,7 +27,7 @@ if __name__=="__main__":
     dis_high=8000
     dis_low=500
     ready_high=200
-    tardy_high=360
+    tardy_high=600
     gap=200
     K_epoch=2
     dis=pd.read_excel('/input/'+"distance_modified.xlsx",index_col=0)
@@ -56,7 +56,7 @@ if __name__=="__main__":
     past_time_step=0
 
     for j in range(number_of_validation):
-        B, T, b, tp, efi, nf, ef, dis, step_to_ij = Pr_sampler.sample()
+        B, T, b, tp, efi, nf, ef,_, step_to_ij = Pr_sampler.sample()
         efi = efi.astype('int')
         validation.append([B, T, tp, b, efi, nf, ef, dis, step_to_ij, tardy_high])
 
@@ -87,7 +87,7 @@ if __name__=="__main__":
         problem=[]
         temp_step=0
         for j in range(number_of_problem):
-            B, T, b, tp, efi, nf, ef, dis, step_to_ij = Pr_sampler.sample()
+            B, T, b, tp, efi, nf, ef, _, step_to_ij = Pr_sampler.sample()
             efi = efi.astype('int')
             problem.append([B, T, tp, b, efi, nf, ef, dis, step_to_ij, tardy_high])
 
@@ -195,7 +195,22 @@ if __name__=="__main__":
                 
                 vessl.log(step=step, payload={'valid_average_reward_full':valid_reward_full})
 
-                
+    problem_name='HD_BTSP'
+    Ms='3,3,3'
+    writer = pd.ExcelWriter(problem_dir+problem_name + '.xlsx', engine='openpyxl')
+    dis = pd.DataFrame(validation[0][7])
+    dis.to_excel(writer, sheet_name='dis')
+    df = pd.DataFrame(0, index=[0], columns=['B', 'T', 'B_T', 'Ms'])
+    df['B'] = 45
+    df['T'] = 9
+    df['B_T'] = 10
+    df['Ms'] = Ms
+    df.to_excel(writer,sheet_name='info')
+    for j in range(number_of_validation):
+        dis = pd.DataFrame(validation[j][3])
+        dis.to_excel(writer, sheet_name='block' + str(j))
+
+    
     history=pd.DataFrame(history)
     validation_history=pd.DataFrame(validation_history)
     history.to_excel(history_dir+'history.xlsx', sheet_name='Sheet', index=False)
