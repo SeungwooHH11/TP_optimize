@@ -3,11 +3,10 @@ import numpy as np
 from Simulation_DAN import *
 from Network_DAN import *
 import torch
-#import vessl
+import vessl
 np.random.seed(1)
 random.seed(1)
 torch.manual_seed(1)
-device='cuda'
 if __name__=="__main__":
     problem_dir='/output/problem_set/'
     if not os.path.exists(problem_dir):
@@ -117,14 +116,13 @@ if __name__=="__main__":
                     done_list = np.concatenate((done_list, dones))
             for m in range(K_epoch):
                 ave_loss, v_loss, p_loss = ppo.update(data, prob_list, reward_list, action_list, done_list,step,model_dir)
-                print(ave_loss)
                 loss_temp += ave_loss
             ave_reward = float(ave_reward) / number_of_problem / number_of_batch
             ave_ett = float(ave_ett) / number_of_problem /number_of_batch
             ave_tardy = float(ave_tardy) / number_of_problem / number_of_batch
-            print(ave_reward)
+            
             history[step,0]=ave_reward
-            #vessl.log(step=step, payload={'train_average_reward': ave_reward})
+            vessl.log(step=step, payload={'train_average_reward': ave_reward})
             
             step += 1
             if step%validation_step==1 and step>500:
@@ -192,7 +190,7 @@ if __name__=="__main__":
                 validation_history[valid_step, 10] = best_ett
                 validation_history[valid_step, 11] = best_tardy
                 
-                #vessl.log(step=step, payload={'valid_average_reward_full':valid_reward_full})
+                vessl.log(step=step, payload={'valid_average_reward_full':valid_reward_full})
 
                 
     history=pd.DataFrame(history)
