@@ -133,7 +133,8 @@ def build_node_edge_adjacency_and_features(neighbors, edge_features, node_featur
     # 2. Feature matrix (N+E, F)
     combined_features = torch.zeros((total_nodes, feature_dim), dtype=torch.float32).to(device)
     combined_features[:num_nodes] = node_features
-    combined_features[num_nodes:] = torch.stack(edge_feat_list)
+    if edge_feat_list:
+        combined_features[num_nodes:] = torch.stack(edge_feat_list)
 
     return adj, combined_features
 
