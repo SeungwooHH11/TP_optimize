@@ -455,7 +455,7 @@ class PPO(nn.Module):
         i=0
         for episode in data:
             advantage = 0.0
-            
+            i=0
             for t in reversed(range(i, i + len(episode)-1)):
                 advantage = self.gamma * self.lmbda * advantage + delta[t][0]
                 advantage_lst[t][0] = advantage
