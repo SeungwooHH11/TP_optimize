@@ -451,9 +451,10 @@ class PPO(nn.Module):
 
         advantage_lst = np.zeros(total_time_step)
         advantage_lst = torch.tensor(advantage_lst, dtype=torch.float32).unsqueeze(1).to(device)
+        i=0
         for episode in data:
             advantage = 0.0
-            i = 0
+            
             for t in reversed(range(i, i + len(episode))):
                 advantage = self.gamma * self.lmbda * advantage + delta[t][0]
                 advantage_lst[t][0] = advantage
