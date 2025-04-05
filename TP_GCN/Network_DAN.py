@@ -456,10 +456,10 @@ class PPO(nn.Module):
         for episode in data:
             advantage = 0.0
             i=0
-            for t in reversed(range(i, i + len(episode)-1)):
+            for t in reversed(range(i, i + len(episode))):
                 advantage = self.gamma * self.lmbda * advantage + delta[t][0]
                 advantage_lst[t][0] = advantage
-            i += len(episode)-1
+            i += len(episode)
         ratio = torch.exp(torch.log(pi_a_total.unsqueeze(1)) - torch.log(probs))  # a/b == exp(log(a)-log(b))
 
         surr1 = ratio * advantage_lst
