@@ -51,7 +51,7 @@ if __name__=="__main__":
     mode_list = ['Random', 'SSPT', 'SET', 'SRT', 'ATCS', 'MDD', 'COVERT']
     temp_step = 0
     past_time_step=0
-    '''
+    
     for j in range(number_of_validation):
         B, T, b, tp, efi, nf, ef, dis, step_to_ij = Pr_sampler.sample()
         efi = efi.astype('int')
@@ -79,7 +79,6 @@ if __name__=="__main__":
         print(mod, Control_result[past_time_step:temp_step, nu, 0].mean(),
               Control_result[past_time_step:temp_step, nu, 2].mean(),
               Control_result[past_time_step:temp_step, nu, 4].mean())
-    '''
     for i in range(number_of_iteration):
         problem=[]
         temp_step=0
