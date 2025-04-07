@@ -39,11 +39,9 @@ class Problem_sampling:
 
             weight = np.random.uniform(0, 50*self.Transporter_type)
             temp_type=int(weight/50)
-            #temp_type=int(float(i)/self.Block_Number*self.Transporter_type)
-            ##개수 고정하고 학습해보자
             test[temp_type]+=1
             Block[i,5:5+temp_type]+=1
-        #print(test)
+        
         Block = Block[Block[:,0].argsort()]
         unique_values, counts = np.unique(Block[:, 0], return_counts=True)
         max_count = np.max(counts)
@@ -60,11 +58,8 @@ class Problem_sampling:
                     #edge_fea processing_time, ready_time, tardy_time, weight one hot encoding(self.Transporter_type) 3+self.Transporter_type
                     step_to_ij[int(unique_values[i])][j] = step
                     step += 1
-
         for i in range(self.Transporter_type):
             node_in_fea[0, i*2] =  int(self.Transporter_Number / self.Transporter_type)
-            
-
         for i in range(self.Transporter_Number):
             transporter[i, 0] = int((i*self.Transporter_type)/self.Transporter_Number)  # TP type
             transporter[i, 1] = 0  # TP heading point
@@ -72,8 +67,6 @@ class Problem_sampling:
             transporter[i, 3] = 0  # empty travel time
             transporter[i, 4] = -1  # action i
             transporter[i, 5] = -1  # action j
-
-
         return self.Block_Number, self.Transporter_Number, Block, transporter, edge_fea_idx, node_in_fea, edge_fea, self.Dis , step_to_ij
 
 
