@@ -8,7 +8,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.distributions import Categorical
-
+from torch_geometric.nn import GATConv
 device = 'cuda'
 np.random.seed(1)
 random.seed(1)
@@ -177,6 +177,47 @@ class GCN2(nn.Module):
         return out
 
 
+class GAT(nn.Module):
+    def __init__(self, original_node_fea_len,original_edge_fea_len, hidden_dim,N):
+        super(GAT, self).__init__()
+        self.embedding_n=nn.Linear(original_node_fea_len,hidden_dim)
+        self.embedding_e=nn.Linear(original_edge_fea_len,hidden_dim)
+        self.gcn1 =  GATConv(hidden_dim, hidden_dim, heads=1, concat=False)
+        self.gcn2 =  GATConv(hidden_dim, hidden_dim, heads=1, concat=False)
+        self.gcn3 =  GATConv(hidden_dim, hidden_dim, heads=1, concat=False)
+        self.conv_to_fc = nn.Linear(hidden_dim * N, 256).to(device)
+        self.readout1 = nn.Linear(256, 128).to(device)
+        self.readout2 = nn.Linear(128, 64).to(device)
+        self.fc_out = nn.Linear(64, 1).to(device)
+        self.act_fun = nn.ELU()
+
+    def forward(self, node_in_fea,edge_fea, edge_fea_idx):
+        N,M=edge_fea_idx.shape
+        n=self.embedding_n(node_in_fea)
+        e=self.embedding_e(edge_fea)
+        adj, x=build_node_edge_adjacency_and_features(edge_fea_idx, e, n)
+        adj = normalize_adjacency(adj)
+        x = self.gcn1(x, adj)
+        x = F.relu(x)
+        x = self.gcn2(x, adj)
+        x = F.relu(x)
+        x = self.gcn3(x, adj)
+        return x[:N]
+
+    def readout(self, node_fea):
+        B,N,M=node_fea.shape
+        node_fea = self.conv_to_fc(node_fea.view(B,-1))  # batch
+        node_fea = self.act_fun(node_fea)
+        node_fea = self.readout1(node_fea)
+        node_fea = self.act_fun(node_fea)
+        node_fea = self.readout2(node_fea)
+        node_fea = self.act_fun(node_fea)
+        out = self.fc_out(node_fea)
+        return out
+
+
+
+
 class GCN1(nn.Module):
     def __init__(self, original_node_fea_len, hidden_dim,N):
         super(GCN1, self).__init__()
@@ -315,6 +356,8 @@ class PPO(nn.Module):
             self.gnn = GCN1(int(2*self.transporter_type),32,dis.shape[0])
         if gnn_mode=='GCN2':
             self.gnn=GCN2(int(2*self.transporter_type),int(3+self.transporter_type),32,dis.shape[0])
+        if gnn_mode=='GAT':
+            self.gnn=GAT(int(2*self.transporter_type),int(3+self.transporter_type),32,dis.shape[0])
         self.pi = MLP(32 + 2*int(3+self.transporter_type) + 5 + 5, 1).to(device)
         self.temperature = 1.0
         self.optimizer = optim.Adam(self.parameters(), lr=learning_rate)
@@ -330,7 +373,7 @@ class PPO(nn.Module):
             return self.gnn(node_fea, edge_fea,edge_fea_idx)
         if self.gnn_mode=='GCN1':
             return self.gnn(node_fea, edge_fea_idx)
-        if self.gnn_mode=='GCN2':
+        if self.gnn_mode=='GCN2' or self.gnn_mode=='GAT':
             return self.gnn(node_fea,edge_fea,edge_fea_idx)
     def calculate_pi(self, state_gnn, node_fea, edge_fea, edge_fea_idx, distance, tp_type):
         # node_fea 9,13
