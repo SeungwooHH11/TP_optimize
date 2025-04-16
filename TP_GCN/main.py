@@ -37,7 +37,7 @@ if __name__=="__main__":
     dis=torch.tensor(temp_dis,dtype=torch.float32).to(device)
     ppo=PPO( learning_rate=0.001, lmbda=0.95, gamma=1, alpha=0.5, beta=0.01, epsilon=0.2, discount_factor=1,location_num=location_number,transporter_type=transporter_type,dis=dis,gnn_mode='GAT').to(device)
     number_of_validation=20
-    number_of_validation_batch=50
+    number_of_validation_batch=1
     number_of_problem=10 # 한번에 몇개의 문제를
     number_of_batch=30 # 문제당 몇 episode씩 한번에 학습할껀지
     number_of_trial=1  #1, 10, 100, 1000 #이를 몇번 반복할껀지
