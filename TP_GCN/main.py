@@ -19,10 +19,10 @@ if __name__=="__main__":
         os.makedirs(history_dir)
 
     device='cuda'
-    block_number=30
-    location_number=15
+    block_number=40
+    location_number=20
     transporter_type=2
-    transporter_number=6
+    transporter_number=8
     dis_high=3000
     dis_low=500
     ready_high=100 
@@ -35,7 +35,7 @@ if __name__=="__main__":
     temp_dis[indices] = 0
     
     dis=torch.tensor(temp_dis,dtype=torch.float32).to(device)
-    ppo=PPO( learning_rate=0.0002, lmbda=0.95, gamma=1, alpha=0.5, beta=0.01, epsilon=0.2, discount_factor=1,location_num=location_number,transporter_type=transporter_type,dis=dis,gnn_mode='GCN2').to(device)
+    ppo=PPO( learning_rate=0.0002, lmbda=0.95, gamma=1, alpha=0.5, beta=0.01, epsilon=0.2, discount_factor=1,location_num=location_number,transporter_type=transporter_type,dis=dis,gnn_mode='GAT').to(device)
     number_of_validation=20
     number_of_validation_batch=50
     number_of_problem=10 # 한번에 몇개의 문제를
