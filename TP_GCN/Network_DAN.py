@@ -8,12 +8,64 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.distributions import Categorical
-from torch_geometric.nn import GATConv
+
 device = 'cuda'
 np.random.seed(1)
 random.seed(1)
 torch.manual_seed(1)
+class GATLayer(nn.Module):
+    def __init__(self, in_dim, out_dim, num_heads=1):
+        super(GATLayer, self).__init__()
+        self.num_heads = num_heads
+        self.out_dim = out_dim // num_heads
 
+        # Linear transformation for input feature
+        self.W = nn.Linear(in_dim, out_dim, bias=False)
+
+        # Attention mechanism parameters
+        self.a_src = nn.Parameter(torch.zeros(size=(num_heads, self.out_dim)))
+        self.a_dst = nn.Parameter(torch.zeros(size=(num_heads, self.out_dim)))
+
+        # Initialize weights
+        nn.init.xavier_uniform_(self.W.weight)
+        nn.init.xavier_uniform_(self.a_src)
+        nn.init.xavier_uniform_(self.a_dst)
+
+        # self.dropout = nn.Dropout(dropout)
+
+    def forward(self, X,A):
+        """
+        A: Adjacency matrix (b, n, n)
+        X: Node features (b, n, f)
+        """
+        b, n, _ = X.shape  # Batch size, number of nodes
+
+        # Apply linear transformation
+        X_trans = self.W(X)  # (b, n, out_dim)
+
+        # Multi-head attention
+        X_split = X_trans.view(b, n, self.num_heads, self.out_dim)  # (b, n, heads, out_dim)
+
+        # Compute attention coefficients
+        attn_src = torch.einsum("bnhd,hd->bnh", X_split, self.a_src)  # (b, n, heads)
+        attn_dst = torch.einsum("bnhd,hd->bnh", X_split, self.a_dst)  # (b, n, heads)
+
+        attn_matrix = attn_src.unsqueeze(2) + attn_dst.unsqueeze(1)  # (b, n, n, heads)
+        attn_matrix = F.leaky_relu(attn_matrix, negative_slope=0.2)
+
+        # Mask out non-existing edges (use adjacency matrix)
+        attn_matrix = attn_matrix.masked_fill(A.unsqueeze(-1) == 0, float("-inf"))
+
+        # Apply softmax normalization
+        attn_matrix = F.softmax(attn_matrix, dim=2)
+        # attn_matrix = self.dropout(attn_matrix)  # (b, n, n, heads)
+
+        # Apply attention mechanism
+        out = torch.einsum("bnnk,bnkd->bnkd", attn_matrix, X_split)  # (b, n, heads, out_dim)
+
+        # Concatenate multi-head results
+        out = out.reshape(b, n, -1)  # (b, n, out_dim * heads)
+        return out
 
 class ConvLayer(nn.Module):
     def __init__(self, node_fea_len, edge_fea_len):
@@ -182,9 +234,9 @@ class GAT(nn.Module):
         super(GAT, self).__init__()
         self.embedding_n=nn.Linear(original_node_fea_len,hidden_dim)
         self.embedding_e=nn.Linear(original_edge_fea_len,hidden_dim)
-        self.gcn1 =  GATConv(hidden_dim, hidden_dim, heads=1, concat=False)
-        self.gcn2 =  GATConv(hidden_dim, hidden_dim, heads=1, concat=False)
-        self.gcn3 =  GATConv(hidden_dim, hidden_dim, heads=1, concat=False)
+        self.gcn1 =  GATLayer(hidden_dim, hidden_dim, heads=1)
+        self.gcn2 =  GATLayer(hidden_dim, hidden_dim, heads=1)
+        self.gcn3 =  GATLayer(hidden_dim, hidden_dim, heads=1)
         self.conv_to_fc = nn.Linear(hidden_dim * N, 256).to(device)
         self.readout1 = nn.Linear(256, 128).to(device)
         self.readout2 = nn.Linear(128, 64).to(device)
@@ -196,12 +248,12 @@ class GAT(nn.Module):
         n=self.embedding_n(node_in_fea)
         e=self.embedding_e(edge_fea)
         adj, x=build_node_edge_adjacency_and_features(edge_fea_idx, e, n)
-        adj = normalize_adjacency(adj)
-        x = self.gcn1(x, adj)
+        adj = normalize_adjacency(adj).unsqeeze(0)
+        x = self.gcn1(x.unsqeeze(0), adj)
         x = F.relu(x)
         x = self.gcn2(x, adj)
         x = F.relu(x)
-        x = self.gcn3(x, adj)
+        x = self.gcn3(x, adj).squeeze(0)
         return x[:N]
 
     def readout(self, node_fea):
